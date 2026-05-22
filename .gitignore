@@ -1,5 +1,4 @@
 .env
-workspace/
 node_modules/
 .vscode/
 logs/

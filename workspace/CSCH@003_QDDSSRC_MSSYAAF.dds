@@ -1,0 +1,44 @@
+     A****************************************************************          
+     A*S  ＣＳ．ｃｈ                                               *          
+     A*SS 教育用プログラミング                                     *          
+     A*                                                              *          
+     A*   社員マスター                                             *          
+     A*                                                              *          
+     A*   FILE NAME  : MSSYAAF                                       *          
+     A*   CREATED  BY: CSC)Y.USHIDA        DATE: 2024/05/16          *          
+     A*   UPDATE   BY: ___)_____________   DATE: ____/__/__          *          
+     A*                                                              *          
+     A****************************************************************          
+     A                                      UNIQUE                              
+     A          R MSSYAAR                   TEXT('社員マスター')              
+     A*KEY                                                                      
+     A            MSAASYCD       5S 0       COLHDG('社員コード')              
+     A*KEY                                                                      
+     A*                                                                         
+     A            MSAASYNM      60O         COLHDG('社員名称')                
+     A            MSAASYKN      60O         COLHDG('社員カナ')                
+     A*                                                                         
+     A            MSSADT01       8S 0       COLHDG('生年月日')                
+     A            MSSADT02       8S 0       COLHDG('入社日')                  
+     A            MSSAYBCD       8A         COLHDG('郵便番号')                
+     A            MSSAADR1      16O         COLHDG('住所都道府県')            
+     A            MSSAADD2      32O         COLHDG('住所２')                  
+     A            MSSAADD3      32O         COLHDG('住所３')                  
+     A            MSSATEL1      16A         COLHDG('電話')                    
+     A            MSSATEL2      16A         COLHDG('内線')                    
+     A            MSSAHAIS       1A         COLHDG('削除')                    
+     A*-                                           D:削除                     
+     A*                                                                         
+     A            MSSACRUS      10A         COLHDG('作成ユーザー')            
+     A            MSSACRDT       8S 0       COLHDG('作成日付')                
+     A            MSSACRTM       6S 0       COLHDG('作成時間')                
+     A            MSSACRWS      10A         COLHDG('作成端末ＩＤ')            
+     A            MSSACRPG      10A         COLHDG('作成ＰＧＭＩＤ')          
+     A*                                                                         
+     A            MSSAUPUS      10A         COLHDG('更新ユーザー')            
+     A            MSSAUPDT       8S 0       COLHDG('更新日付')                
+     A            MSSAUPTM       6S 0       COLHDG('更新時間')                
+     A            MSSAUPWS      10A         COLHDG('更新端末ＩＤ')            
+     A            MSSAUPPG      10A         COLHDG('更新ＰＧＭＩＤ')          
+     A*                                                                         
+     A          K MSAASYCD                                                      
