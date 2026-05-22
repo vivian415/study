@@ -35,6 +35,14 @@ IBM i
 ---
 ## 3. GitHub / 開発ディレクトリ構成
 
+### Repository Information
+```text
+| Item | Value |
+|---|---|
+| Repository | study |
+| GitHub | https://github.com/vivian415/study |
+| Purpose | IBM i × VS Code × MCP Server development platform |
+```
 ### MCP-SERVER
 IBM i と AI を連携するための開発基盤
 
@@ -116,7 +124,7 @@ CRTSQLRPG CSCH@003 TESTEMP
 CALLPGM CSCH@003 TESTEMP
 ```
 
-```text
+```
 CALL PGM(CSCH@003/TESTEMP)
 ```
 ---
@@ -125,7 +133,7 @@ CALL PGM(CSCH@003/TESTEMP)
 DSPLY
 5250で確認
 
-SQLRPGの場合
+StextQLRPGの場合
 ```sql
 SELECT MSAASYCD, MSAASYNM
 FROM CSCH@003.MSSYAAF;
