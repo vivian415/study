@@ -33,8 +33,28 @@ IBM i
 ライブラリー / ファイル / メンバー / プログラム
 ```
 ---
+## 3. GitHub / 開発ディレクトリ構成
 
-## 3. MCPサーバー起動
+### MCP-SERVER
+IBM i と AI を連携するための開発基盤
+
+### Directory Structure
+
+- ibmi-tools
+  - IBM i utility scripts
+
+- ifs-work
+  - extracted IBM i source files
+
+- workspace
+  - temporary AI working files
+
+- docs
+  - architecture and operation documents
+
+---
+
+## 4. MCPサーバー起動
 
 ```powershell
 cd C:\Users\K4293\mcp-server
@@ -43,7 +63,7 @@ node server.js
 
 ---
 
-## 4. ライブラリー確認
+## 5. ライブラリー確認
 対象ライブラリー内のオブジェクト一覧を表示する。
 ```powershell
 OPENOBJ CSCH@003
@@ -51,14 +71,14 @@ OPENOBJ CSCH@003
 
 ---
 
-## 5. メンバー一覧
+## 6. メンバー一覧
 ソースファイル内のメンバー一覧を表示する。
 ```powershell
 OPENMEN2 CSCH@003 QRPGSRC@1
 ```
 ---
 
-## 6. メンバーを開く
+## 7. メンバーを開く
 指定メンバーをVS Codeで編集可能な状態にする。
 ```powershell
 OPENMBR CSCH@003 QRPGSRC@1 TESTEMP rpg
@@ -66,18 +86,18 @@ OPENMBR CSCH@003 QRPGSRC@1 TESTEMP rpg
 
 ---
 
-## 7. 修正
+## 8. 修正
 VS Codeで修正
 
 ---
-## 8. 保存
+## 9. 保存
 
 ```powershell
 SAVEFILE CSCH@003 QRPGSRC@1 TESTEMP rpg
 ```
 
 ---
-## 9. コンパイル
+## 10. コンパイル
 通常RPGの場合
 
 ```powershell
@@ -90,7 +110,7 @@ CRTSQLRPG CSCH@003 TESTEMP
 ```
 
 ---
-## 10. 実行
+## 11. 実行
 
 ```powershell
 CALLPGM CSCH@003 TESTEMP
@@ -101,7 +121,7 @@ CALL PGM(CSCH@003/TESTEMP)
 ```
 ---
 
-## 11. 結果確認
+## 12. 結果確認
 DSPLY
 5250で確認
 
@@ -111,7 +131,7 @@ SELECT MSAASYCD, MSAASYNM
 FROM CSCH@003.MSSYAAF;
 ```
 ---
-## 12. 作業フロー
+## 13. 作業フロー
 
 ```text
 ① server.js起動
@@ -126,7 +146,7 @@ FROM CSCH@003.MSSYAAF;
 ```
 
 ---
-## 13. コマンド一覧
+## 14. コマンド一覧
 ```powershell
 node server.js
 ```
