@@ -28,7 +28,11 @@ app.use((req, res, next) => {
 function runIBMi(command, callback) {
   const conn = new Client();
 
-  const cmd = (command || "").trim().toUpperCase();
+ const rawCmd = (command || "").trim();
+
+ const cmd = rawCmd;
+
+ const baseCommand = rawCmd.split(" ")[0].toUpperCase();
 
 const ALLOWED_COMMANDS = new Set([
   "ECHO",
@@ -40,11 +44,11 @@ const ALLOWED_COMMANDS = new Set([
   "CRTLF",
   "RMVM",
   "ADDPFM",
+  "EXPORTSRC",
   "SYSTEM"  // ← これ追加
 
 ]);
 
-  const baseCommand = cmd.split(" ")[0];
 
 if (!ALLOWED_COMMANDS.has(baseCommand)) {
   return callback("Blocked command");
@@ -74,6 +78,54 @@ if (!ALLOWED_COMMANDS.has(baseCommand)) {
   }, 10000);
 
 conn.on("ready", () => {
+
+  if (baseCommand === "EXPORTSRC") {
+
+  const parts = cmd.split(" ");
+
+  const lib = parts[1];
+  const srcf = parts[2];
+  const mbr = parts[3];
+
+  const ifsDir = `/home/K4293/ifs-work/${lib}/${srcf}`;
+  const toFile = `${ifsDir}/${mbr}.rpgle`;
+
+ const clCommand =
+  `mkdir -p ${ifsDir} ; ` +
+  `system "CPYTOSTMF FROMMBR('/QSYS.LIB/${lib}.LIB/${srcf}.FILE/${mbr}.MBR') ` +
+  `TOSTMF('${toFile}') ` +
+  `STMFOPT(*REPLACE) STMFCCSID(1208)"`;
+
+  conn.exec(clCommand, (err, stream) => {
+
+    if (err) {
+      return safeFinish(`Error: ${err.message}`);
+    }
+
+    let stdout = "";
+    let stderr = "";
+
+    stream.on("data", (d) => {
+      stdout += d.toString("utf8");
+    });
+
+    stream.stderr.on("data", (d) => {
+      stderr += d.toString("utf8");
+    });
+
+    stream.on("close", () => {
+      safeFinish({
+        stdout,
+        stderr,
+        exported: toFile
+      });
+    });
+
+  });
+
+  return;
+}
+
   conn.exec(cmd, { pty: false }, (err, stream) => {
     if (err) {
       return safeFinish(`Error: ${err.message}`);
@@ -227,10 +279,27 @@ app.post("/open-member", async (req, res) => {
 
     await connection.close();
 
-    const dir = path.join(__dirname, "workspace");
-    if (!fs.existsSync(dir)) fs.mkdirSync(dir);
+const dir = path.join(__dirname, "workspace");
 
-    const filePath = path.join(dir, `${library}_${file}_${member}.${ext}`);
+if (!fs.existsSync(dir)) {
+  fs.mkdirSync(dir);
+}
+
+const dirPath = path.join(
+  dir,
+  library,
+  file
+);
+
+if (!fs.existsSync(dirPath)) {
+  fs.mkdirSync(dirPath, { recursive: true });
+}
+
+const filePath = path.join(
+  dirPath,
+  `${member}.${ext}`
+);
+
     const text = rows.map(r => r.SRCDTA).join("\n");
 
    fs.writeFileSync(filePath, text, "utf8");
