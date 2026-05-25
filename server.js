@@ -86,17 +86,30 @@ app.post("/open-member", async (req, res) => {
   try {
 
     const connection = await odbc.connect(
-  `Driver={IBM i Access ODBC Driver};System=${process.env.IBMI_HOST};UID=${process.env.IBMI_USER};PWD=${process.env.IBMI_PASSWORD};CCSID=1208;`
+  `Driver={IBM i Access ODBC Driver};System=${process.env.IBMI_HOST};UID=${process.env.IBMI_USER};PWD=${process.env.IBMI_PASSWORD};CCSID=1208;NAM=1;`
 );
 
-    await connection.query(
-      `CREATE OR REPLACE ALIAS QTEMP.MBRSRC
-       FOR "${library}"."${file}"("${member}")`
-    );
+const aliasSql = `
+CREATE OR REPLACE ALIAS QTEMP.MBRSRC
+FOR ${library}/${file}(${member})
+`;
 
-    const rows = await connection.query(
-      "SELECT SRCDTA FROM QTEMP.MBRSRC ORDER BY SRCSEQ"
-    );
+console.log("ALIAS SQL");
+console.log(aliasSql);
+
+await connection.query(aliasSql);
+
+const sql = `
+SELECT SRCSEQ, SRCDTA
+FROM QTEMP.MBRSRC
+ORDER BY SRCSEQ
+`;
+
+console.log("SELECT SQL");
+console.log(sql);
+
+const rows = await connection.query(sql);
+
 
     await connection.close();
 
@@ -127,7 +140,7 @@ app.post("/open-member", async (req, res) => {
 
   } catch (err) {
 
-    console.log(err);
+   console.dir(err, { depth: null });
 
     res.status(500).json({
       success: false,
@@ -220,7 +233,11 @@ app.post("/save-member", async (req, res) => {
 //
 app.post("/compile-rpg", async (req, res) => {
 
-  const { targetlib, srclib, srcfile, member } = req.body;
+const member = req.body.member.toUpperCase();
+
+const targetlib = "CSCH@003";
+const srclib    = "CSCH@003";
+const srcfile   = "QRPGSRC@1";
 
   console.log("HOST=", process.env.IBMI_HOST);
   console.log("USER=", process.env.IBMI_USER);
@@ -232,31 +249,49 @@ app.post("/compile-rpg", async (req, res) => {
       `Driver={IBM i Access ODBC Driver};System=${process.env.IBMI_HOST};UID=${process.env.IBMI_USER};PWD=${process.env.IBMI_PASSWORD};CCSID=1208;`
     );
 
-    const sql =
-      `CALL QSYS2.QCMDEXC('CRTBNDRPG PGM(${targetlib}/${member}) SRCFILE(${srclib}/${srcfile}) SRCMBR(${member})')`;
 
-    console.log(sql);
+console.log("addlible start");
 
-    await connection.query(sql);
+const addlib = `ADDLIBLE CSCH@003`;
+
+const cmd =
+  `CRTBNDRPG PGM(${targetlib}/${member}) SRCFILE(${srclib}/${srcfile}) SRCMBR(${member})`;
+
+console.log(cmd);
+
+console.log("addlible start");
+
+await connection.query(
+  `CALL QSYS2.QCMDEXC('${addlib}', ${addlib.length}.00000)`
+);
+
+console.log("compile start");
+
+await connection.query(
+  `CALL QSYS2.QCMDEXC('${cmd}', ${cmd.length}.00000)`
+);
+
+console.log("compile end");
+
 
     await connection.close();
 
     res.json({
-      success: true,
-      sql
-    });
+  success: true,
+  message: "compile submitted"
+});
 
   } catch (err) {
 
-    console.log(err);
+  console.log("ERROR FULL=");
+  console.dir(err, { depth: null });
 
-    res.status(500).json({
-      success: false,
-      error: err.message
-    });
+  res.status(500).json({
+    success: false,
+    error: err.message
+  });
 
-  }
-
+}
 });
 
 //
