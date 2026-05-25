@@ -4,14 +4,19 @@ LIB=$1
 SRCF=$2
 MBR=$3
 
-IFSFILE="/QSYS.LIB/${LIB}.LIB/${SRCF}.FILE/${MBR}.MBR"
-OUTFILE="/tmp/${MBR}.src"
+IFS_DIR="/home/K4293/ifs-work/${LIB}/${SRCF}"
 
-echo "=== COPY SOURCE ==="
-echo "${IFSFILE}"
+mkdir -p "${IFS_DIR}"
 
-system "CPYTOSTMF FROMMBR('${IFSFILE}') \
-TOSTMF('${OUTFILE}') \
+FROMFILE="/QSYS.LIB/${LIB}.LIB/${SRCF}.FILE/${MBR}.MBR"
+TOFILE="${IFS_DIR}/${MBR}.rpgle"
+
+echo "=== EXPORT SOURCE ==="
+echo "FROM : ${FROMFILE}"
+echo "TO   : ${TOFILE}"
+
+system "CPYTOSTMF FROMMBR('${FROMFILE}') \
+TOSTMF('${TOFILE}') \
 STMFCCSID(1208) \
 STMFOPT(*REPLACE)"
 
@@ -21,6 +26,5 @@ if [ $? -ne 0 ]; then
 fi
 
 echo
-echo "=== SOURCE HEAD ==="
-
-head -50 "${OUTFILE}"
+echo "=== EXPORT COMPLETE ==="
+echo "${TOFILE}"

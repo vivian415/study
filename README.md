@@ -1,24 +1,37 @@
 # IBM i × VS Code × MCPサーバー開発プロセス仕様書
 
 ## 1. 目的
-VS CodeからMCPサーバー経由でIBM iに接続し、ソースメンバーの取得・編集・保存・コンパイル・実行検証を行う。
+VS CodeからMCPサーバー経由でIBM iに接続し、ソースメンバーの取得・編集・保存・コンパイル・実行検証を行う。このアーキテクチャは、既存のソースPF（メンバー）資産を破棄することなく、IBM i（AS/400）の開発をモダナイズ（近代化）します。
 
+### Source Management Architecture
+```text
+IBM i source PF(member)
+↓
+ODBC
+↓
+MCP Server
+↓
+workspace(stream file)
+↓
+VS Code / GitHub / AI
 
-## 補足
+MCP server converts IBM i source PF(member)
+into stream files managed inside workspace/.
 
-本手順は、IBM i の **CSCH@003 ライブラリー**を参照して作成した。
-
+This architecture removes dependency on CPYTOSTMF
+and minimizes direct IFS operations.
+```
 ---
 
 ## 接続情報について
-
+```text
 MCPサーバー（server.js）で使用する以下の接続情報は、ソースコードには直接記載せず、`.env`ファイルに定義し、Git管理対象外（.gitignoreに追加）とすることで、機密情報の漏洩を防ぎ、安全に管理する。
 
 - サーバーID
 - ユーザーID
 - パスワード
 - APIキー
-
+```
 ---
 
 ## 2. システム構成
@@ -35,6 +48,13 @@ IBM i
 ---
 ## 3. GitHub / 開発ディレクトリ構成
 
+### IBM i Development Directory Structure
+```text
+KJNML   = Production runtime
+KJNMLD  = Development source
+KJNMLT  = Test / compile environment
+```
+
 ### Repository Information
 ```text
 | Item | Value |
@@ -44,22 +64,60 @@ IBM i
 | Purpose | IBM i × VS Code × MCP Server development platform |
 ```
 ### MCP-SERVER
-IBM i と AI を連携するための開発基盤
+```text
+IBM i と AI を連携するための開発基盤。
+
+MCP Server は
+source PF(member) と stream file の
+変換レイヤーとして機能する。
+
+DB record型 source を、
+.rpgle / .cl / .dds などの
+stream file に変換し、
+VS Code / GitHub / AI と連携する。
+```
 
 ### Directory Structure
-
+```text
 - ibmi-tools
   - IBM i utility scripts
 
-- ifs-work
-  - extracted IBM i source files
+workspace
+  - IBM i source stream files
+  - Git managed source repository
+  - AI development workspace
 
-- workspace
-  - temporary AI working files
+ifs-work
+  - legacy CPYTOSTMF / IFS export area
+  - transitional use only
 
 - docs
   - architecture and operation documents
+```
 
+### workspace structure
+```text
+今回の検証環境にあわせたライブラリー名、メンバー名で記載しています。
+workspace/
+ ├── KJNML/
+ │    └── QRPGLESRC/
+ │         └── TESTEMP.rpgle
+ │
+ ├── KJNMLD/QRPGLESRC
+ │    └── QRPGLESRC/
+ │         └── TESTEMP.rpgle
+ │
+ └── KJNMLT/
+```
+
+### Development Policy
+```text
+Production members are opened from KJNML.
+
+Modified sources are saved into KJNMLD.
+
+Compiled test objects are generated in KJNMLT.
+```
 ---
 
 ## 4. MCPサーバー起動
@@ -72,9 +130,9 @@ node server.js
 ---
 
 ## 5. ライブラリー確認
-対象ライブラリー内のオブジェクト一覧を表示する。
+対象ライブラリー内（今回は本番区画KJNML)のオブジェクト一覧を表示する。
 ```powershell
-OPENOBJ CSCH@003
+OPENOBJ KJNML
 ```
 
 ---
@@ -82,14 +140,14 @@ OPENOBJ CSCH@003
 ## 6. メンバー一覧
 ソースファイル内のメンバー一覧を表示する。
 ```powershell
-OPENMEN2 CSCH@003 QRPGSRC@1
+OPENMEN2 KJNML QRPGLESRC
 ```
 ---
 
 ## 7. メンバーを開く
 指定メンバーをVS Codeで編集可能な状態にする。
 ```powershell
-OPENMBR CSCH@003 QRPGSRC@1 TESTEMP rpg
+OPENMBR KJNML QRPGLESRC TESTEMP rpgle
 ```
 
 ---
@@ -100,32 +158,34 @@ VS Codeで修正
 ---
 ## 9. 保存
 
+修正したMemberをKJNMLD(開発区画）に保存する。
 ```powershell
-SAVEFILE CSCH@003 QRPGSRC@1 TESTEMP rpg
+SAVEFILE KJNMLD QRPGLESRC TESTEMP rpgle
 ```
 
 ---
 ## 10. コンパイル
-通常RPGの場合
 
+修正したMemberをKJNMLT(検証区画）にコンパイルする。
+通常RPGの場合
 ```powershell
-CRTRPG CSCH@003 TESTEMP
+CRTRPG KJNMLT TESTEMP
 ```
 
 SQLRPGの場合
 ```powershell
-CRTSQLRPG CSCH@003 TESTEMP
+CRTSQLRPG KJNMLT TESTEMP
 ```
 
 ---
 ## 11. 実行
 
 ```powershell
-CALLPGM CSCH@003 TESTEMP
+CALLPGM KJNMLT TESTEMP
 ```
 
-```
-CALL PGM(CSCH@003/TESTEMP)
+```powershell
+CALL PGM(KJNMLT/TESTEMP)
 ```
 ---
 
@@ -136,22 +196,23 @@ DSPLY
 StextQLRPGの場合
 ```sql
 SELECT MSAASYCD, MSAASYNM
-FROM CSCH@003.MSSYAAF;
+FROM KJNMLT.MSSYAAF;
 ```
 ---
 ## 13. 作業フロー
 
 ```text
 ① server.js起動
-② OPENOBJ
-③ OPENMEN2
-④ OPENMBR
-⑤ 修正
-⑥ SAVEFILE
-⑦ コンパイル
-⑧ 実行
-⑨ 確認
-```
+② OPENOBJ （本番区画のオブジェクト一覧）
+③ OPENMEN2（本番区画のソースメンバー一覧）
+④ OPENMBR（本番区画のメンバーをVS Codeで開く）
+⑤ VS Code修正
+⑥ Git commit / push
+⑦ SAVEFILE（修正したメンバーを開発区画に保存）
+⑧ compile（検証区画 KJNMLT に object生成）
+⑨ test（KJNMLT 上で runtime validation）
+⑩ deploy（KJNMLD source を production runtime KJNML へ compile/deploy）
+```　
 
 ---
 ## 14. コマンド一覧
@@ -160,14 +221,45 @@ node server.js
 ```
 
 ```powershell
-OPENOBJ CSCH@003
-OPENMEN2 CSCH@003 QRPGSRC@1
-OPENMBR CSCH@003 QRPGSRC@1 TESTEMP rpg
+OPENLIB
 
-SAVEFILE CSCH@003 QRPGSRC@1 TESTEMP rpg
+OPENOBJ <library>
 
-CRTRPG CSCH@003 TESTEMP
-CRTSQLRPG CSCH@003 TESTEMP
+OPENMBR <library> <file>
 
-CALLPGM CSCH@003 TESTEMP
+CODEMBR <library> <file> <member> <ext>
+
+SAVEMBR <library> <file> <member> <ext>
+
+CRTRPG <targetlib> <srclib> <srcfile> <member>
+
+CRTSQLRPG <targetlib> <srclib> <srcfile> <member>
+
+CRTPF <targetlib> <srclib> <srcfile> <member>
+
+CRTDSPF <targetlib> <srclib> <srcfile> <member>
+
+CALLPGM <library> <program>
 ```
+
+## Future Architecture
+
+AI
+↓
+OPENMBR
+↓
+source analysis
+↓
+SAVEFILE
+↓
+compile
+↓
+test
+↓
+deploy
+
+Future integration targets:
+- IBM watsonx Code Assistant for i
+- IBM Bob
+- automated build pipeline
+- AI-assisted RPG modernization

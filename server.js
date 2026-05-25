@@ -1,276 +1,97 @@
 const express = require("express");
-const { Client } = require("ssh2");
-const readline = require("readline");
+const odbc = require("odbc");
 const fs = require("fs");
 const path = require("path");
 const { exec } = require("child_process");
 require("dotenv").config();
 
 const app = express();
+
 app.use(express.json());
 
-const odbc = require("odbc");
-
-// APIキー（残すならOK）
+//
+// API KEY CHECK
+//
 app.use((req, res, next) => {
-  if (req.path === "/" || req.path === "/health") 
+
+  if (req.path === "/") {
     return next();
+  }
 
   if (req.headers["x-api-key"] !== process.env.API_KEY) {
-    return res.status(401).send("Unauthorized");
+    return res.status(401).json({
+      success: false,
+      error: "Unauthorized"
+    });
   }
 
   next();
+
 });
 
-
-// IBM iコマンド実行
-function runIBMi(command, callback) {
-  const conn = new Client();
-
- const rawCmd = (command || "").trim();
-
- const cmd = rawCmd;
-
- const baseCommand = rawCmd.split(" ")[0].toUpperCase();
-
-const ALLOWED_COMMANDS = new Set([
-  "ECHO",
-  "UNAME",
-  "DB2",
-  "CRTBNDRPG",
-  "CRTDSPF",
-  "CRTPF",
-  "CRTLF",
-  "RMVM",
-  "ADDPFM",
-  "EXPORTSRC",
-  "SYSTEM"  // ← これ追加
-
-]);
-
-
-if (!ALLOWED_COMMANDS.has(baseCommand)) {
-  return callback("Blocked command");
-}
-
-  let finished = false;
-  let connClosed = false;
-
-  function safeFinish(result) {
-    if (finished) return;
-    finished = true;
-
-    clearTimeout(timeout);
-
-    if (!connClosed) {
-      connClosed = true;
-      try {
-        conn.end();
-      } catch {}
-    }
-
-    callback(result);
-  }
-
-  const timeout = setTimeout(() => {
-    safeFinish("Timeout");
-  }, 10000);
-
-conn.on("ready", () => {
-
-  if (baseCommand === "EXPORTSRC") {
-
-  const parts = cmd.split(" ");
-
-  const lib = parts[1];
-  const srcf = parts[2];
-  const mbr = parts[3];
-
-  const ifsDir = `/home/K4293/ifs-work/${lib}/${srcf}`;
-  const toFile = `${ifsDir}/${mbr}.rpgle`;
-
- const clCommand =
-  `mkdir -p ${ifsDir} ; ` +
-  `system "CPYTOSTMF FROMMBR('/QSYS.LIB/${lib}.LIB/${srcf}.FILE/${mbr}.MBR') ` +
-  `TOSTMF('${toFile}') ` +
-  `STMFOPT(*REPLACE) STMFCCSID(1208)"`;
-
-  conn.exec(clCommand, (err, stream) => {
-
-    if (err) {
-      return safeFinish(`Error: ${err.message}`);
-    }
-
-    let stdout = "";
-    let stderr = "";
-
-    stream.on("data", (d) => {
-      stdout += d.toString("utf8");
-    });
-
-    stream.stderr.on("data", (d) => {
-      stderr += d.toString("utf8");
-    });
-
-    stream.on("close", () => {
-      safeFinish({
-        stdout,
-        stderr,
-        exported: toFile
-      });
-    });
-
-  });
-
-  return;
-}
-
-  conn.exec(cmd, { pty: false }, (err, stream) => {
-    if (err) {
-      return safeFinish(`Error: ${err.message}`);
-    }
-
-    let stdout = "";
-    let stderr = "";
-
-    stream.on("data", (d) => {
-      stdout += d.toString("utf8");
-    });
-
-    if (stream.stderr) {
-      stream.stderr.on("data", (d) => {
-        stderr += d.toString("utf8");
-      });
-    }
-
-    stream.on("close", (code, signal) => {
-      safeFinish({
-        code,
-        signal,
-        stdout,
-        stderr
-      });
-    });
-  });
-});
-
-
-conn.on("error", (err) => {
-  safeFinish(`SSH ERROR: ${err.message}`);
-});
-
-conn.connect({
-    host: process.env.IBMI_HOST,
-    port: 22,
-    username: process.env.IBMI_USER,
-    password: process.env.IBMI_PASSWORD
-  });
-}
- 
-// テスト
+//
+// HEALTH CHECK
+//
 app.get("/", (req, res) => {
-  res.send("OK");
-});
 
-// ライブラリ確認（今はダミーでもOK）
-app.get("/libraries", (req, res) => {
-  res.json({ ok: true });
-});
-
-// IBM iコマンド実行
-app.post("/run", (req, res) => {
-  console.log("RUN HIT");
-  console.log("BODY:", req.body);
-
-  console.log("IBMI_HOST:", process.env.IBMI_HOST);
-  console.log("IBMI_USER:", process.env.IBMI_USER);
-  console.log("IBMI_PASSWORD:", process.env.IBMI_PASSWORD ? "***" : "EMPTY");
-
-  const { command } = req.body;
-
-  if (!command) {
-    return res.status(400).json({ error: "command is required" });
-  }
-
-  runIBMi(command, (output) => {
-    res.json({
-      success: true,
-      command,
-      output
-    });
+  res.json({
+    success: true,
+    message: "MCP Server Running"
   });
+
 });
 
-// SQL実行（ODBC）
+//
+// SQL EXECUTION
+//
 app.post("/sql", async (req, res) => {
+
   const { sql } = req.body;
 
-  if (!sql) {
-    return res.status(400).json({ error: "sql is required" });
-  }
-
   try {
+
     const connection = await odbc.connect(
-  `Driver={IBM i Access ODBC Driver};System=${process.env.IBMI_HOST};UID=${process.env.IBMI_USER};PWD=${process.env.IBMI_PASSWORD};CCSID=1208;`
-);
+      `Driver={IBM i Access ODBC Driver};System=${process.env.IBMI_HOST};UID=${process.env.IBMI_USER};PWD=${process.env.IBMI_PASSWORD};CCSID=1208;`
+    );
 
     const result = await connection.query(sql);
-    await connection.close();
-
-    res.json({
-      success: true,
-      rows: result
-    });
-  } catch (err) {
-    res.status(500).json({
-      success: false,
-      error: err.message
-    });
-  }
-});
-
-// メンバーソース取得
-app.post("/member-source", async (req, res) => {
-  const { library, file, member } = req.body;
-
-  try {
-    const connection = await odbc.connect(
-  `Driver={IBM i Access ODBC Driver};System=${process.env.IBMI_HOST};UID=${process.env.IBMI_USER};PWD=${process.env.IBMI_PASSWORD};CCSID=1208;`
-);
-
-    await connection.query(
-      `CREATE OR REPLACE ALIAS QTEMP.MBRSRC FOR ${library}.${file}(${member})`
-    );
-
-    const result = await connection.query(
-      "SELECT SRCSEQ, SRCDAT, SRCDTA FROM QTEMP.MBRSRC ORDER BY SRCSEQ"
-    );
 
     await connection.close();
 
     res.json({
-      success: true,
+     success: true,
       rows: result
     });
+
   } catch (err) {
+
+    console.log(err);
+
     res.status(500).json({
       success: false,
       error: err.message
     });
+
   }
+
 });
 
+//
+// OPEN MEMBER
+//
 app.post("/open-member", async (req, res) => {
-  const { library, file, member, ext = "cl" } = req.body;
+
+  const { library, file, member, ext = "txt" } = req.body;
 
   try {
+
     const connection = await odbc.connect(
   `Driver={IBM i Access ODBC Driver};System=${process.env.IBMI_HOST};UID=${process.env.IBMI_USER};PWD=${process.env.IBMI_PASSWORD};CCSID=1208;`
 );
 
     await connection.query(
-      `CREATE OR REPLACE ALIAS QTEMP.MBRSRC FOR ${library}.${file}(${member})`
+      `CREATE OR REPLACE ALIAS QTEMP.MBRSRC
+       FOR "${library}"."${file}"("${member}")`
     );
 
     const rows = await connection.query(
@@ -279,30 +100,23 @@ app.post("/open-member", async (req, res) => {
 
     await connection.close();
 
-const dir = path.join(__dirname, "workspace");
+    const dirPath = path.join(
+      __dirname,
+      "workspace",
+      library,
+      file
+    );
 
-if (!fs.existsSync(dir)) {
-  fs.mkdirSync(dir);
-}
+    fs.mkdirSync(dirPath, { recursive: true });
 
-const dirPath = path.join(
-  dir,
-  library,
-  file
-);
-
-if (!fs.existsSync(dirPath)) {
-  fs.mkdirSync(dirPath, { recursive: true });
-}
-
-const filePath = path.join(
-  dirPath,
-  `${member}.${ext}`
-);
+    const filePath = path.join(
+      dirPath,
+      `${member}.${ext}`
+    );
 
     const text = rows.map(r => r.SRCDTA).join("\n");
 
-   fs.writeFileSync(filePath, text, "utf8");
+    fs.writeFileSync(filePath, text, "utf8");
 
     exec(`code "${filePath}"`);
 
@@ -310,49 +124,74 @@ const filePath = path.join(
       success: true,
       filePath
     });
+
   } catch (err) {
+
+    console.log(err);
+
     res.status(500).json({
       success: false,
       error: err.message
     });
+
   }
+
 });
 
-// メンバー書き戻し
+//
+// SAVE MEMBER
+//
 app.post("/save-member", async (req, res) => {
+
   const { library, file, member, ext = "txt" } = req.body;
 
   try {
-    const filePath = path.join(__dirname, "workspace", `${library}_${file}_${member}.${ext}`);
+
+    const filePath = path.join(
+      __dirname,
+      "workspace",
+      library,
+      file,
+      `${member}.${ext}`
+    );
 
     if (!fs.existsSync(filePath)) {
-      return res.status(404).json({ success: false, error: "local file not found" });
+
+      return res.status(404).json({
+        success: false,
+        error: "local file not found"
+      });
+
     }
 
     const text = fs.readFileSync(filePath, "utf8");
-    const lines = text.replace(/\r\n/g, "\n").split("\n");
+
+    const lines = text
+      .replace(/\r\n/g, "\n")
+      .split("\n");
 
     const connection = await odbc.connect(
       `Driver={IBM i Access ODBC Driver};System=${process.env.IBMI_HOST};UID=${process.env.IBMI_USER};PWD=${process.env.IBMI_PASSWORD};CCSID=1208;`
     );
 
     await connection.query(
-      `CREATE OR REPLACE ALIAS QTEMP.MBRSRC FOR ${library}.${file}(${member})`
+      `CREATE OR REPLACE ALIAS QTEMP.MBRSRC
+       FOR "${library}"."${file}"("${member}")`
     );
 
-    // 既存メンバー内容を削除
-    await connection.query("DELETE FROM QTEMP.MBRSRC");
+    await connection.query(
+      "DELETE FROM QTEMP.MBRSRC"
+    );
 
-    // 行単位で書き戻し
     for (let i = 0; i < lines.length; i++) {
+
       const seq = (i + 1).toFixed(2);
-      const srcdat = 0;
-      const srcdta = lines[i];
 
       await connection.query(
         "INSERT INTO QTEMP.MBRSRC (SRCSEQ, SRCDAT, SRCDTA) VALUES (?, ?, ?)",
-        [seq, srcdat, srcdta]
+        [seq, 0, lines[i]]
       );
+
     }
 
     await connection.close();
@@ -360,25 +199,91 @@ app.post("/save-member", async (req, res) => {
     res.json({
       success: true,
       message: "member saved",
-      library,
-      file,
-      member,
       lines: lines.length
     });
 
   } catch (err) {
+
+    console.log(err);
+
     res.status(500).json({
       success: false,
       error: err.message
     });
+
   }
+
 });
 
-// 起動
+//
+// COMPILE RPG
+//
+app.post("/compile-rpg", async (req, res) => {
+
+  const { targetlib, srclib, srcfile, member } = req.body;
+
+  console.log("HOST=", process.env.IBMI_HOST);
+  console.log("USER=", process.env.IBMI_USER);
+  console.log("PWD=", process.env.IBMI_PASSWORD ? "***" : "EMPTY");
+
+  try {
+
+    const connection = await odbc.connect(
+      `Driver={IBM i Access ODBC Driver};System=${process.env.IBMI_HOST};UID=${process.env.IBMI_USER};PWD=${process.env.IBMI_PASSWORD};CCSID=1208;`
+    );
+
+    const sql =
+      `CALL QSYS2.QCMDEXC('CRTBNDRPG PGM(${targetlib}/${member}) SRCFILE(${srclib}/${srcfile}) SRCMBR(${member})')`;
+
+    console.log(sql);
+
+    await connection.query(sql);
+
+    await connection.close();
+
+    res.json({
+      success: true,
+      sql
+    });
+
+  } catch (err) {
+
+    console.log(err);
+
+    res.status(500).json({
+      success: false,
+      error: err.message
+    });
+
+  }
+
+});
+
+//
+// SERVER START
+//
 app.listen(3000, "0.0.0.0", () => {
+
   console.log("server running on http://localhost:3000");
-  console.log("IBMI_HOST:", process.env.IBMI_HOST);
-  console.log("IBMI_USER:", process.env.IBMI_USER);
-  console.log("IBMI_PASSWORD:", process.env.IBMI_PASSWORD ? "***" : "EMPTY");
-  console.log("API_KEY:", process.env.API_KEY ? "***" : "EMPTY");
+
+  console.log(
+    "IBMI_HOST:",
+    process.env.IBMI_HOST
+  );
+
+  console.log(
+    "IBMI_USER:",
+    process.env.IBMI_USER
+  );
+
+  console.log(
+    "IBMI_PASSWORD:",
+    process.env.IBMI_PASSWORD ? "***" : "EMPTY"
+  );
+
+  console.log(
+    "API_KEY:",
+    process.env.API_KEY ? "***" : "EMPTY"
+  );
+
 });
