@@ -5,6 +5,61 @@ const path = require("path");
 const { exec } = require("child_process");
 require("dotenv").config();
 
+// ===== PC workspace root =====
+
+const LOCAL_ROOT =
+  "C:/Users/K4293/mcp-server/workspace";
+
+// ===== TYPE → extension =====
+
+function getExtension(type) {
+
+  const map = {
+    RPGLE: "rpgle",
+    RPG: "rpg",
+    CLLE: "clle",
+    PF: "pf",
+    DSPF: "dspf",
+    PRTF: "prtf",
+    TXT: "txt",
+    SQLRPGLE: "sqlrpgle"
+  };
+
+  return map[type.toUpperCase()] || "txt";
+}
+
+// ===== build local path =====
+
+function buildLocalPath(
+  library,
+  srcFile,
+  member,
+  type
+) {
+
+  const ext = getExtension(type);
+
+  return path.join(
+    LOCAL_ROOT,
+    library,
+    srcFile,
+    `${member}.${ext}`
+  );
+}
+
+// ===== ensure directory =====
+
+function ensureDir(filePath) {
+
+  const dir = path.dirname(filePath);
+
+  if (!fs.existsSync(dir)) {
+    fs.mkdirSync(dir, {
+      recursive: true
+    });
+  }
+}
+
 const app = express();
 
 app.use(express.json());
@@ -81,7 +136,12 @@ app.post("/sql", async (req, res) => {
 //
 app.post("/open-member", async (req, res) => {
 
-  const { library, file, member, ext = "txt" } = req.body;
+  const {
+    library,
+    srcFile,
+    member,
+    ext = "txt"
+  } = req.body;
 
   try {
 
@@ -91,7 +151,7 @@ app.post("/open-member", async (req, res) => {
 
 const aliasSql = `
 CREATE OR REPLACE ALIAS QTEMP.MBRSRC
-FOR ${library}/${file}(${member})
+FOR "${library}"."${srcFile}"("${member}")
 `;
 
 console.log("ALIAS SQL");
@@ -100,7 +160,7 @@ console.log(aliasSql);
 await connection.query(aliasSql);
 
 const sql = `
-SELECT SRCSEQ, SRCDTA
+SELECT SRCDTA
 FROM QTEMP.MBRSRC
 ORDER BY SRCSEQ
 `;
@@ -110,14 +170,14 @@ console.log(sql);
 
 const rows = await connection.query(sql);
 
-
+console.log(rows);
     await connection.close();
 
     const dirPath = path.join(
       __dirname,
       "workspace",
       library,
-      file
+      srcFile
     );
 
     fs.mkdirSync(dirPath, { recursive: true });
@@ -129,6 +189,8 @@ const rows = await connection.query(sql);
 
     const text = rows.map(r => r.SRCDTA).join("\n");
 
+    console.log(text);
+    
     fs.writeFileSync(filePath, text, "utf8");
 
     exec(`code "${filePath}"`);
@@ -237,7 +299,7 @@ const member = req.body.member.toUpperCase();
 
 const targetlib = "CSCH@003";
 const srclib    = "CSCH@003";
-const srcfile   = "QRPGSRC@1";
+const srcFile   = "QRPGSRC@1";
 
   console.log("HOST=", process.env.IBMI_HOST);
   console.log("USER=", process.env.IBMI_USER);
@@ -255,7 +317,7 @@ console.log("addlible start");
 const addlib = `ADDLIBLE CSCH@003`;
 
 const cmd =
-  `CRTBNDRPG PGM(${targetlib}/${member}) SRCFILE(${srclib}/${srcfile}) SRCMBR(${member})`;
+  `CRTBNDRPG PGM(${targetlib}/${member}) SRCFILE(${srclib}/${srcFile}) SRCMBR(${member})`;
 
 console.log(cmd);
 
@@ -322,3 +384,13 @@ app.listen(3000, "0.0.0.0", () => {
   );
 
 });
+
+const testPath =
+  buildLocalPath(
+    "KJNMLD",
+    "QRPGSRC@1",
+    "HELLO",
+    "TXT"
+  );
+
+console.log(testPath);

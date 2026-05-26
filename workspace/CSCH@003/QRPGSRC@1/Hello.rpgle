@@ -1,4 +1,0 @@
-**FREE
-DSPLY 'HELLO';
-*INLR = *ON;
-RETURN;
