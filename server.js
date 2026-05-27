@@ -213,6 +213,7 @@ console.log(rows);
 
 });
 
+
 //
 // SAVE MEMBER
 //
@@ -291,69 +292,209 @@ app.post("/save-member", async (req, res) => {
 });
 
 //
-// COMPILE RPG
+// COPY SOURCE FILE
 //
-app.post("/compile-rpg", async (req, res) => {
+app.post("/copy-src", async (req, res) => {
 
-const member = req.body.member.toUpperCase();
-
-const targetlib = "CSCH@003";
-const srclib    = "CSCH@003";
-const srcFile   = "QRPGSRC@1";
-
-  console.log("HOST=", process.env.IBMI_HOST);
-  console.log("USER=", process.env.IBMI_USER);
-  console.log("PWD=", process.env.IBMI_PASSWORD ? "***" : "EMPTY");
+  const {
+  fromLib,
+  srcFile,
+  toLib
+} = req.body;
 
   try {
 
     const connection = await odbc.connect(
-      `Driver={IBM i Access ODBC Driver};System=${process.env.IBMI_HOST};UID=${process.env.IBMI_USER};PWD=${process.env.IBMI_PASSWORD};CCSID=1208;`
+      `Driver={IBM i Access ODBC Driver};System=${process.env.IBMI_HOST};UID=${process.env.IBMI_USER};PWD=${process.env.IBMI_PASSWORD};CCSID=1208;NAM=1;`
     );
 
+    const cmd =
+      `CRTSRCPF FILE(${toLib}/${srcFile}) ` +
+      `RCDLEN(112)`;
 
-console.log("addlible start");
+    const sql = `
+CALL QSYS2.QCMDEXC('${cmd}')
+`;
 
-const addlib = `ADDLIBLE CSCH@003`;
+    console.log("COPY SRC SQL");
+    console.log(sql);
 
-const cmd =
-  `CRTBNDRPG PGM(${targetlib}/${member}) SRCFILE(${srclib}/${srcFile}) SRCMBR(${member})`;
-
-console.log(cmd);
-
-console.log("addlible start");
-
-await connection.query(
-  `CALL QSYS2.QCMDEXC('${addlib}', ${addlib.length}.00000)`
-);
-
-console.log("compile start");
-
-await connection.query(
-  `CALL QSYS2.QCMDEXC('${cmd}', ${cmd.length}.00000)`
-);
-
-console.log("compile end");
-
+    await connection.query(sql);
 
     await connection.close();
 
     res.json({
-  success: true,
-  message: "compile submitted"
-});
+      success: true,
+      message: `${srcFile} created in ${toLib}`
+    });
 
   } catch (err) {
 
-  console.log("ERROR FULL=");
-  console.dir(err, { depth: null });
+    console.dir(err, { depth: null });
 
-  res.status(500).json({
-    success: false,
-    error: err.message
-  });
+    res.status(500).json({
+      success: false,
+      error: err.message
+    });
 
-}
+  }
+
+});
+
+//
+// COPY MEMBER
+//
+app.post("/copy-member", async (req, res) => {
+
+ const {
+  fromLib,
+  srcFile,
+  member,
+  toLib
+} = req.body;
+
+  try {
+
+    const connection = await odbc.connect(
+      `Driver={IBM i Access ODBC Driver};System=${process.env.IBMI_HOST};UID=${process.env.IBMI_USER};PWD=${process.env.IBMI_PASSWORD};CCSID=1208;NAM=1;`
+    );
+
+    const cmd =
+      `CPYSRCF ` +
+      `FROMFILE(${fromLib}/${srcFile}) ` +
+      `TOFILE(${toLib}/${srcFile}) ` +
+      `FROMMBR(${member}) ` +
+      `TOMBR(${member}) ` +
+      `MBROPT(*REPLACE)`;
+
+    const sql = `
+CALL QSYS2.QCMDEXC('${cmd}')
+`;
+
+    console.log("COPY MEMBER SQL");
+    console.log(sql);
+
+    await connection.query(sql);
+
+    await connection.close();
+
+    res.json({
+      success: true,
+      message: `${member} copied to ${toLib}`
+    });
+
+  } catch (err) {
+
+    console.dir(err, { depth: null });
+
+    res.status(500).json({
+      success: false,
+      error: err.message
+    });
+
+  }
+
+});
+
+//
+// COMPILE RPG
+//
+app.post("/compile-rpg", async (req, res) => {
+
+  const {
+    targetlib,
+    srclib,
+    srcfile,
+    member
+  } = req.body;
+
+  try {
+
+    const connection = await odbc.connect(
+      `Driver={IBM i Access ODBC Driver};System=${process.env.IBMI_HOST};UID=${process.env.IBMI_USER};PWD=${process.env.IBMI_PASSWORD};CCSID=1208;NAM=1;`
+    );
+
+    const cmd =
+      `CRTBNDRPG ` +
+      `PGM(${targetlib}/${member}) ` +
+      `SRCFILE(${srclib}/${srcfile}) ` +
+      `SRCMBR(${member})`;
+
+    const sql = `
+CALL QSYS2.QCMDEXC('${cmd}')
+`;
+
+    console.log("COMPILE RPG SQL");
+    console.log(sql);
+
+    await connection.query(sql);
+
+    await connection.close();
+
+    res.json({
+      success: true,
+      message: `${member} compiled`
+    });
+
+  } catch (err) {
+
+    console.dir(err, { depth: null });
+
+    res.status(500).json({
+      success: false,
+      error: err.message
+    });
+
+  }
+
+});
+
+//
+// CALL PROGRAM
+//
+app.post("/call-pgm", async (req, res) => {
+
+  const {
+    library,
+    program
+  } = req.body;
+
+  try {
+
+    const connection = await odbc.connect(
+      `Driver={IBM i Access ODBC Driver};System=${process.env.IBMI_HOST};UID=${process.env.IBMI_USER};PWD=${process.env.IBMI_PASSWORD};CCSID=1208;NAM=1;`
+    );
+
+    const cmd =
+      `CALL PGM(${library}/${program})`;
+
+    const sql = `
+CALL QSYS2.QCMDEXC('${cmd}')
+`;
+
+    console.log("CALL PROGRAM SQL");
+    console.log(sql);
+
+    await connection.query(sql);
+
+    await connection.close();
+
+    res.json({
+      success: true,
+      message: `${program} called`
+    });
+
+  } catch (err) {
+
+    console.dir(err, { depth: null });
+
+    res.status(500).json({
+      success: false,
+      error: err.message
+    });
+
+  }
+
 });
 
 //
