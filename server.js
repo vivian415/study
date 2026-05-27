@@ -618,34 +618,4 @@ app.listen(3000, "0.0.0.0", () => {
 
   console.log("server running on http://localhost:3000");
 
-  console.log(
-    "IBMI_HOST:",
-    process.env.IBMI_HOST
-  );
-
-  console.log(
-    "IBMI_USER:",
-    process.env.IBMI_USER
-  );
-
-  console.log(
-    "IBMI_PASSWORD:",
-    process.env.IBMI_PASSWORD ? "***" : "EMPTY"
-  );
-
-  console.log(
-    "API_KEY:",
-    process.env.API_KEY ? "***" : "EMPTY"
-  );
-
 });
-
-const testPath =
-  buildLocalPath(
-    "KJNMLD",
-    "QRPGSRC@1",
-    "HELLO",
-    "TXT"
-  );
-
-console.log(testPath);
