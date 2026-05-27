@@ -112,9 +112,9 @@ API_KEY=your-secure-api-key
 ### repository clone
 
 ```powershell
-git clone https://github.com/vivian415/study.git
+git clone https://github.com/vivian415/study.git mcp-server
 
-cd study
+cd mcp-server
 ```
 
 ### Node.js library install
@@ -136,8 +136,9 @@ IBMI_USER=...
 IBMI_PASSWORD=...
 API_KEY=...
 ```
+
 `.env` は Git 管理対象外とし、
-絶対に repository へ commit しない。
+絶対に Git repository へ commit しない。
 
 
 ### PowerShell command load
@@ -261,12 +262,16 @@ KJNMLT  = 検証区画（テスト/コンパイル環境）
 
 ## 実行フロー
 
+```text
 1. MCPサーバー起動
 2. IBM i からソースメンバーを取得 → workspace に保存
 3. VS Code で編集
 4. 修正内容を IBM i に保存
 5. コンパイル
 6. プログラム実行・検証
+7. 本番 source member deploy
+8. 本番 object deploy
+```
 
 
 ---
@@ -292,11 +297,13 @@ KJNMLT  = 検証/コンパイル環境
 4. Git commit / push
 5. 検証環境へコンパイル
 6. 検証環境でテスト
-7. 本番 source deploy
+7. 本番 source member deploy
 8. 本番 object deploy
 ```
 
 ### コマンド例
+
+```powershell
 cpysrc kjnml qrpgsrc@1 kjnmld
 
 cpymbr kjnml qrpgsrc@1 hello kjnmld
@@ -316,6 +323,7 @@ callpgm kjnmlt hello
 deploymbr kjnmld qrpgsrc@1 hello kjnml
 
 deployobj hello *pgm kjnmlt kjnml
+```
 
 本番環境（KJNML）では compile を行わない。
 
@@ -326,6 +334,14 @@ deployobj hello *pgm kjnmlt kjnml
 
 KJNMLT で compile・検証済み object を
 DEPLOYOBJ により本番環境へ deploy する。
+```
+
+## Git運用ポリシー
+
+```text
+- workspace を Git 管理する
+- IBM i source だけを正式 source にしない
+- Git を変更履歴管理として利用する
 ```
 
 ## 将来の統合予定
