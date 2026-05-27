@@ -96,19 +96,63 @@ API_KEY=your-secure-api-key
 
 ---
 
-## インストール
+## セットアップ
 
-```bash
+### 必要環境
+
+- Node.js
+- npm
+- VS Code
+- IBM i Access ODBC Driver
+- IBM i 接続権限
+- PowerShell 7 推奨
+
+## 初期セットアップ
+
+### repository clone
+
+```powershell
+git clone https://github.com/vivian415/study.git
+
+cd study
+```
+
+### Node.js library install
+
+```powershell
 npm install
 ```
 
-## MCPサーバー起動
+`package.json` を元に必要な Node.js library を取得し、
+`node_modules` を生成する。
+
+### 環境変数設定
+
+`.env` を作成する。
+
+```env
+IBMI_HOST=...
+IBMI_USER=...
+IBMI_PASSWORD=...
+API_KEY=...
+```
+`.env` は Git 管理対象外とし、
+絶対に repository へ commit しない。
+
+
+### PowerShell command load
+
+```powershell
+. .\scripts\profile.ps1
+```
+
+### MCPサーバー起動
 
 ```powershell
 node server.js
 ```
-
 サーバーは `http://localhost:3000` で起動します。
+
 
 **レスポンス:**
 ```json
