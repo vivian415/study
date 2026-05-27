@@ -1,3 +1,12 @@
+## このプロジェクトについて
+
+IBM i のソースメンバーは、
+現代的なAI開発ツールから直接扱いにくい。
+
+本プロジェクトは、
+IBM i 開発資産と AI支援開発環境を接続し、
+将来的な AI活用型 IBM i 開発基盤を目指す。
+
 # IBM i MCP Server
 
 VS CodeからMCPサーバー経由でIBM iのソースメンバーを取得・編集・保存し、モダンな開発環境で管理するシステム。
@@ -344,13 +353,6 @@ DEPLOYOBJ により本番環境へ deploy する。
 - Git を変更履歴管理として利用する
 ```
 
-## 将来の統合予定
-
-- IBM watsonx Code Assistant for i
-- IBM Bob
-- 自動ビルドパイプライン
-- AI支援RPG近代化
-
 ---
 
 ## コマンド一覧
@@ -409,3 +411,102 @@ deploymbr kjnmld qrpgsrc@1 hello kjnml
 
 deployobj hello *pgm kjnmlt kjnml
 ```
+
+## 将来構想
+
+このMCPサーバーは、Claude や IBM watsonx Code Assistant（Bob）などのAIツールから、
+安全に IBM i 資産へアクセスすることを目的としている。
+
+### 想定アーキテクチャ
+
+```text
+Claude / Bob
+    ↓
+MCP Client
+    ↓
+本MCP Server
+    ↓
+IBM i
+```
+MCP Client は Claude Desktop や VS Code AI extension 側に存在し、
+AI から MCP Server のツールを呼び出す役割を持つ。
+
+### 今後実装予定の機能
+
+- IBM i コマンド実行
+- ソースメンバー参照
+- メンバーのIFS変換
+- VS Code + AI による編集
+- IBM i メンバーへの保存
+- Git連携
+- コンパイル支援
+
+### 実装予定コマンド
+
+OPENLIB  
+OPENOBJ  
+OPENMBR  
+SAVEMBR  
+CRTRPG  
+CRTSQLRPG  
+CALLPGM
+
+DSPFD
+DSPPGMREF
+DSPOBJD
+RTVMBRD
+RUNSQL  
+
+
+### AI編集フロー
+
+IBM i の source member は従来の member file structure で管理されており、
+VS Code や AI editor から直接扱いにくい。
+
+そのため一度 IFS stream file へ変換し、
+UTF-8 ベースの modern editor workflow へ接続する。
+
+```text
+IBM i ソースメンバー
+    ↓
+OPENMBR
+    ↓
+IFS Stream File化
+    ↓
+VS Code + Claude/Bob
+    ↓
+Git Commit
+    ↓
+SAVEMBR
+    ↓
+IBM i コンパイル
+```
+
+## AI利用時の原則
+
+AI が生成したコードは必ず人間がレビューする。
+本番 deploy 前には KJNMLT で compile / test を行う。
+
+### 安全設計
+
+実行可能コマンドはホワイトリスト方式で制御する。
+
+以下のような危険コマンドは実行不可とする。
+
+- DLTLIB
+- CLRPFM
+- CHGUSRPRF
+
+### 今後の課題
+
+- CCSID変換
+- UTF-8対応
+- 固定形式RPG対応
+- メンバー同期
+- コンパイルエラー解析
+
+## Goal
+
+本プロジェクトは、
+IBM i の既存資産を維持しながら、
+AI支援開発とモダン開発フローを接続することを目的とする。
