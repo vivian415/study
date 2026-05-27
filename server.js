@@ -498,6 +498,120 @@ CALL QSYS2.QCMDEXC('${cmd}')
 });
 
 //
+// DEPLOY OBJECT
+//
+app.post("/deploy-obj", async (req, res) => {
+
+  const {
+    object,
+    type,
+    fromLib,
+    toLib
+  } = req.body;
+
+  try {
+
+    const connection = await odbc.connect(
+      `Driver={IBM i Access ODBC Driver};
+       System=${process.env.IBMI_HOST};
+       UID=${process.env.IBMI_USER};
+       PWD=${process.env.IBMI_PASSWORD};
+       CCSID=1208;
+       NAM=1;`
+    );
+
+    const cmd =
+      `CRTDUPOBJ OBJ(${object}) ` +
+      `FROMLIB(${fromLib}) ` +
+      `OBJTYPE(${type}) ` +
+      `TOLIB(${toLib})`;
+
+    const sql = `
+CALL QSYS2.QCMDEXC('${cmd}')
+`;
+
+    console.log(cmd);
+
+    await connection.query(sql);
+
+    await connection.close();
+
+    res.json({
+      success: true,
+      message: `${object} deployed`
+    });
+
+  } catch (err) {
+
+    console.dir(err, { depth: null });
+
+    res.status(500).json({
+      success: false,
+      error: err.message
+    });
+
+  }
+
+});
+
+//
+// DEPLOY MEMBER
+//
+app.post("/deploy-member", async (req, res) => {
+
+  const {
+    fromLib,
+    srcFile,
+    member,
+    toLib
+  } = req.body;
+
+  try {
+
+    const connection = await odbc.connect(
+      `Driver={IBM i Access ODBC Driver};
+       System=${process.env.IBMI_HOST};
+       UID=${process.env.IBMI_USER};
+       PWD=${process.env.IBMI_PASSWORD};
+       CCSID=1208;
+       NAM=1;`
+    );
+
+    const cmd =
+      `CPYSRCF FROMFILE(${fromLib}/${srcFile}) ` +
+      `TOFILE(${toLib}/${srcFile}) ` +
+      `FROMMBR(${member}) ` +
+      `TOMBR(${member})`;
+
+    const sql = `
+CALL QSYS2.QCMDEXC('${cmd}')
+`;
+
+    console.log(cmd);
+
+    await connection.query(sql);
+
+    await connection.close();
+
+    res.json({
+      success: true,
+      message: `${member} deployed`
+    });
+
+  } catch (err) {
+
+    console.dir(err, { depth: null });
+
+    res.status(500).json({
+      success: false,
+      error: err.message
+    });
+
+  }
+
+});
+
+//
 // SERVER START
 //
 app.listen(3000, "0.0.0.0", () => {

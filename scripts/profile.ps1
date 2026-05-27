@@ -349,3 +349,53 @@ function CALLPGM {
 
     $response
 }
+
+function DEPLOYOBJ {
+
+    param(
+        [string]$object,
+        [string]$type,
+        [string]$fromlib,
+        [string]$tolib
+    )
+
+    Invoke-RestMethod `
+      -Method POST `
+      -Uri "$BaseUrl/deploy-obj" `
+      -Headers @{
+          "Content-Type" = "application/json"
+          "x-api-key"    = $ApiKey
+      } `
+      -Body (@{
+          object  = $object.ToUpper()
+          type    = $type.ToUpper()
+          fromLib = $fromlib.ToUpper()
+          toLib   = $tolib.ToUpper()
+      } | ConvertTo-Json)
+
+}
+
+function DEPLOYMBR {
+
+    param(
+        [string]$fromlib,
+        [string]$srcfile,
+        [string]$member,
+        [string]$tolib
+    )
+
+    Invoke-RestMethod `
+      -Method POST `
+      -Uri "$BaseUrl/deploy-member" `
+      -Headers @{
+          "Content-Type" = "application/json"
+          "x-api-key"    = $ApiKey
+      } `
+      -Body (@{
+          fromLib = $fromlib.ToUpper()
+          srcFile = $srcfile.ToUpper()
+          member  = $member.ToUpper()
+          toLib   = $tolib.ToUpper()
+      } | ConvertTo-Json)
+
+}

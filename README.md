@@ -235,6 +235,55 @@ KJNMLT  = 検証区画（テスト/コンパイル環境）
 
 ---
 
+## デプロイフロー
+
+```text
+KJNML   = 本番環境
+KJNMLD  = 開発ソース環境
+KJNMLT  = 検証/コンパイル環境
+
+1. 本番ソースを開発環境へコピー
+2. VS Code で編集
+3. SAVEMBR で IBM i に保存
+4. Git commit / push
+5. 検証環境へコンパイル
+6. 検証環境でテスト
+7. 本番 source deploy
+8. 本番 object deploy
+```
+
+### コマンド例
+cpysrc kjnml qrpgsrc@1 kjnmld
+
+cpymbr kjnml qrpgsrc@1 hello kjnmld
+
+codembr kjnmld qrpgsrc@1 hello
+
+savembr kjnmld qrpgsrc@1 hello
+
+git add .
+git commit -m "Update HELLO"
+git push
+
+crtrpg kjnmlt kjnmld qrpgsrc@1 hello
+
+callpgm kjnmlt hello
+
+deploymbr kjnmld qrpgsrc@1 hello kjnml
+
+deployobj hello *pgm kjnmlt kjnml
+
+本番環境（KJNML）では compile を行わない。
+
+## 本番運用ポリシー
+
+```text
+本番環境（KJNML）では compile を行わない。
+
+KJNMLT で compile・検証済み object を
+DEPLOYOBJ により本番環境へ deploy する。
+```
+
 ## 将来の統合予定
 
 - IBM watsonx Code Assistant for i
@@ -276,6 +325,10 @@ CRTPF <targetlib> <srclib> <srcfile> <member>
 CRTDSPF <targetlib> <srclib> <srcfile> <member>
 
 CALLPGM <library> <program>
+
+DEPLOYMBR <fromlib> <srcfile> <member> <tolib>
+
+DEPLOYOBJ <object> <type> <fromlib> <tolib>
 ```
 
 ### 使用例
@@ -291,4 +344,8 @@ savembr kjnmld qrpgsrc@1 hello
 crtrpg kjnmlt kjnmld qrpgsrc@1 hello
 
 callpgm kjnmlt hello
+
+deploymbr kjnmld qrpgsrc@1 hello kjnml
+
+deployobj hello *pgm kjnmlt kjnml
 ```
