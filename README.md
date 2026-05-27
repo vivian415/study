@@ -1,15 +1,171 @@
-## このプロジェクトについて
-
-IBM i のソースメンバーは、
-現代的なAI開発ツールから直接扱いにくい。
-
-本プロジェクトは、
-IBM i 開発資産と AI支援開発環境を接続し、
-将来的な AI活用型 IBM i 開発基盤を目指す。
-
 # IBM i MCP Server
 
 VS CodeからMCPサーバー経由でIBM iのソースメンバーを取得・編集・保存し、モダンな開発環境で管理するシステム。
+
+
+## このプロジェクトについて
+
+従来の IBM i 開発環境は、
+5250 や SEU を中心とした人間操作を前提としており、
+現代的な AI開発ツールから直接扱うことが難しい。
+
+本プロジェクトでは、
+IBM i のソース資産や開発操作を API 化し、
+VS Code や AI支援ツールと接続することで、
+AI活用型 IBM i 開発基盤の構築を目指す。
+
+現在は、
+
+* IBM i メンバーの VS Code 編集
+* MCPサーバー経由での保存・コンパイル
+* AI支援によるコーディング補助
+
+を中心に検証を行っている。
+
+将来的には、
+
+* AIによるソース解析
+* 自動修正
+* コンパイル
+* エラー解析
+* 影響範囲分析
+* Git連携
+
+などを含む、
+IBM i 開発の AIエージェント化を目標とする。
+
+
+## MCPサーバー運用と Code for IBM i 運用の違い
+
+### 概要
+
+本環境では IBM i のソース編集方法として、以下の2つの方式を想定している。
+
+- MCPサーバー経由の編集
+- Code for IBM i を利用した編集
+
+どちらも VS Code 上でソース編集可能だが、目的と役割が異なる。
+
+## 1. Code for IBM i を利用した運用
+
+### 標準機能
+
+Code for IBM i は、IBM i 開発向けの VS Code 拡張であり、以下の機能を標準提供する。
+
+- ライブラリ参照
+- ソースファイル参照
+- メンバー編集
+- 保存
+- コンパイル
+- IFS操作
+- ジョブ実行
+
+### 運用イメージ
+
+```text
+IBM i
+ ↓
+Code for IBM i
+ ↓
+VS Code
+ ↓
+AI拡張（Claude / ChatGPT 等）
+```
+
+### 特徴
+
+* 人間が操作主体
+* IBM i 開発環境として成熟している
+* RPG/DDS/CL の通常開発に向く
+* Git連携が容易
+* AI補助コーディングとの相性が良い
+
+### 主な用途
+
+* 日常開発
+* 保守
+* RPG修正
+* SQL化
+* FREE化
+* Git運用
+
+
+## 2. MCPサーバー経由の運用
+
+### 構成
+
+MCPサーバーは、IBM i の操作を API 化し、AIから利用可能にするための仕組みである。
+
+Node.js + Express + SSH2 を利用して IBM i に接続し、コマンド実行やメンバー操作を行う。
+
+### 運用イメージ
+
+```text
+IBM i
+ ↓
+MCP Server（API化）
+ ↓
+VS Code / AI
+ ↓
+Claude / ChatGPT
+```
+
+### 現段階での運用
+
+現在は以下の流れで運用する。
+
+```text
+OPENMBR
+ ↓
+VS Codeで編集
+ ↓
+AI支援でコーディング
+ ↓
+SAVEMBR
+ ↓
+CRTRPG / CRTSQLRPG
+```
+
+AIが直接 IBM i メンバーを開くのではなく、
+人間が MCP経由で開いたソースを AI が編集支援する形となる。
+
+### 特徴
+
+* AIエージェント化を想定
+* IBM i 操作を API 化できる
+* 将来的な自動化拡張が可能
+* AIからコンパイル・解析連携可能
+
+### 主な用途
+
+* AI連携実験
+* 自動化検証
+* 将来的なAIエージェント開発
+* IBM i API基盤構築
+
+### 現時点での推奨運用
+
+| 用途 | 推奨 |
+|---|---|
+| 日常開発 | Code for IBM i |
+| AI連携・検証 | MCPサーバー |
+
+用途に応じて両者を使い分ける。
+
+### 将来的な構想
+
+将来的には MCP を通じて AI が以下を自律実行可能となることを想定する。
+
+- メンバー検索
+- ソース解析
+- 自動修正
+- コンパイル
+- エラー解析
+- 影響範囲分析
+- Git連携
+
+IBM i 開発の AI エージェント化を目標とする。
+
 
 ## 目的
 
@@ -334,14 +490,14 @@ deploymbr kjnmld qrpgsrc@1 hello kjnml
 deployobj hello *pgm kjnmlt kjnml
 ```
 
-本番環境（KJNML）では compile を行わない。
+本番環境（KJNML）ではコンパイルを行わない。
 
 ## 本番運用ポリシー
 
 ```text
-本番環境（KJNML）では compile を行わない。
+本番環境（KJNML）ではコンパイルを行わない。
 
-KJNMLT で compile・検証済み object を
+KJNMLT で コンパイル・検証済み object を
 DEPLOYOBJ により本番環境へ deploy する。
 ```
 
@@ -443,19 +599,19 @@ AI から MCP Server のツールを呼び出す役割を持つ。
 
 ### 実装予定コマンド
 
-OPENLIB  
-OPENOBJ  
-OPENMBR  
-SAVEMBR  
-CRTRPG  
-CRTSQLRPG  
-CALLPGM
+- OPENLIB  
+- OPENOBJ  
+- OPENMBR  
+- SAVEMBR  
+- CRTRPG  
+- CRTSQLRPG  
+- CALLPGM
 
-DSPFD
-DSPPGMREF
-DSPOBJD
-RTVMBRD
-RUNSQL  
+- DSPFD
+- DSPPGMREF
+- DSPOBJD
+- RTVMBRD
+- RUNSQL  
 
 
 ### AI編集フロー
@@ -505,7 +661,7 @@ AI が生成したコードは必ず人間がレビューする。
 - メンバー同期
 - コンパイルエラー解析
 
-## Goal
+## ゴール
 
 本プロジェクトは、
 IBM i の既存資産を維持しながら、
