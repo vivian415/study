@@ -46,7 +46,7 @@ IBM i 開発の AIエージェント化を目標とする。
 
 どちらも VS Code 上でソース編集可能だが、目的と役割が異なる。
 
-## 1. Code for IBM i を利用した運用
+### 1. Code for IBM i を利用した運用
 
 ### 標準機能
 
@@ -90,7 +90,7 @@ AI拡張（Claude / ChatGPT 等）
 * Git運用
 
 
-## 2. MCPサーバー経由の運用
+### 2. MCPサーバー経由の運用
 
 ### 構成
 
@@ -167,10 +167,9 @@ AIが直接 IBM i メンバーを開くのではなく、
 IBM i 開発の AI エージェント化を目標とする。
 
 
-## 目的
+## 開発コンセプト
 
 VS CodeからMCPサーバー経由でIBM iに接続し、ソースメンバーの取得・編集・保存を行う。既存のソースPF（メンバー）資産を破棄することなく、IBM i（AS/400）の開発をモダナイズ（近代化）します。
-
 ### システム構成
 ```
 IBM i Library / Source File / Member
@@ -568,6 +567,76 @@ deploymbr kjnmld qrpgsrc@1 hello kjnml
 deployobj hello *pgm kjnmlt kjnml
 ```
 
+VS Code Task Integration
+目的
+
+VS Code 上から IBM i MCP command を実行し、
+Project BOB や AI coding assistant から利用可能な
+IBM i AI development workflow を構築する。
+
+VS Code Task（tasks.json）を利用することで、
+IBM i の操作を VS Code workflow に統合し、
+AI支援によるコーディング・修正・コンパイル運用を行う。
+
+OPENLIB / OPENOBJ / OPENMBR / SAVEMBR / CRTRPG などの
+MCP command は VS Code の Run Task から選択し、
+コマンドライン経由で実行可能とした。
+
+これにより、VS Code Task workflow を IBM BOB に適用することで、
+BOB は workspace 上の IBM i source を利用した
+AI coding support を行えるようになった。
+
+IBM i の source member は MCP Server を経由して
+workspace 上へ展開され、
+BOB はその source を通常の VS Code file として参照・編集できる。
+
+また、OPENMBR / SAVEMBR / CRTRPG などの command を
+VS Code Task 経由で実行することで、
+IBM i source の取得・保存・コンパイル workflow を
+VS Code 上へ統合した。
+
+
+### 構成
+```text
+VS Code
+ ↓
+tasks.json
+ ↓
+MCP Server
+ ↓
+IBM i
+```
+
+### 現段階での制限事項
+
+> [!IMPORTANT]
+> 現段階では IBM BOB / AI coding assistant は
+> workspace source を対象とした coding support 用途で利用する。
+
+MCP Server を通じて IBM i source の取得・編集・保存・コンパイルは可能であるが、
+AI が IBM i システム全体を自律的に解析・操作するものではない。
+
+現在は以下を中心とした運用を想定する。
+
+- RPGソース編集
+- FREE化
+- SQL化
+- コード説明
+- リファクタリング
+- AI支援コーディング
+
+現段階では以下は未実装、または限定的である。
+
+- システム全体の見える化
+- 自動影響範囲分析
+- AIによる自律コンパイル
+- AIによる自律修正
+- 完全なAIエージェント運用
+- Project BOB からの直接 MCP tool call
+
+これらは将来的な構想として段階的に実装を目指す。
+
+
 ## 将来構想
 
 このMCPサーバーは、Claude や IBM watsonx Code Assistant（Bob）などのAIツールから、
@@ -599,20 +668,40 @@ AI から MCP Server のツールを呼び出す役割を持つ。
 
 ### 実装予定コマンド
 
-- OPENLIB  
-- OPENOBJ  
-- OPENMBR  
-- SAVEMBR  
-- CRTRPG  
-- CRTSQLRPG  
-- CALLPGM
+### Source Operations
+
+- OPENLIB
+- OPENOBJ
+- OPENMBR
+- SAVEMBR
+
+### Compile Operations
+
+- CRTRPG
+- CRTSQLRPG
+
+### Analysis Operations
 
 - DSPFD
 - DSPPGMREF
 - DSPOBJD
 - RTVMBRD
-- RUNSQL  
+- RUNSQL
 
+## Current Status
+
+現在以下を実装済み：
+
+- MCP Server 起動
+- OPENLIB
+- OPENOBJ
+- OPENMBR
+- SAVEMBR
+- CPYSRC
+- CPYMBR
+- CRTRPG
+- VS Code Task integration
+- AI coding workflow
 
 ### AI編集フロー
 
