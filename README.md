@@ -567,8 +567,9 @@ deploymbr kjnmld qrpgsrc@1 hello kjnml
 deployobj hello *pgm kjnmlt kjnml
 ```
 
-VS Code Task Integration
-目的
+## VS Code Task Integration
+
+### 目的
 
 VS Code 上から IBM i MCP command を実行し、
 Project BOB や AI coding assistant から利用可能な
