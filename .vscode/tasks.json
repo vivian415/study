@@ -1,0 +1,90 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Start MCP Server",
+      "type": "shell",
+      "command": "npm start"
+    },
+    {
+  "label": "IBM i MCP OPENOBJ",
+  "type": "shell",
+  "command": "OPENOBJ ${input:lib}"
+},
+    {
+  "label": "IBM i MCP OPENLIB",
+  "type": "shell",
+  "command": "OPENLIB ${input:lib}"
+},
+    {
+      "label": "IBM i MCP OPENMBR",
+      "type": "shell",
+      "command": "OPENMBR ${input:lib} ${input:file} ${input:mbr}"
+    },
+
+    {
+  "label": "IBM i MCP CPYSRC",
+  "type": "shell",
+  "command": "CPYSRC ${input:fromlib} ${input:tolib}"
+},
+{
+  "label": "IBM i MCP CPYMBR",
+  "type": "shell",
+  "command": "CPYMBR ${input:fromlib} ${input:fromfile} ${input:member} ${input:tolib}"
+},
+{
+  "label": "IBM i MCP CODEMBR",
+  "type": "shell",
+  "command": "CODEMBR ${input:lib} ${input:file} ${input:mbr}"
+},
+
+    {
+      "label": "IBM i MCP SAVEMBR",
+      "type": "shell",
+      "command": "SAVEMBR ${input:lib} ${input:file} ${input:mbr}"
+    },
+    {
+      "label": "IBM i MCP CRTRPG",
+      "type": "shell",
+      "command": "CRTRPG KJNMLT ${input:lib} ${input:file} ${input:mbr}"
+    }
+  ],
+
+  "inputs": [
+    {
+      "id": "lib",
+      "type": "promptString",
+      "description": "Library"
+    },
+    {
+      "id": "file",
+      "type": "promptString",
+      "description": "Source File"
+    },
+    {
+      "id": "mbr",
+      "type": "promptString",
+      "description": "Member"
+    },
+    {
+  "id": "fromlib",
+  "type": "promptString",
+  "description": "From Library"
+},
+{
+  "id": "tolib",
+  "type": "promptString",
+  "description": "To Library"
+},
+{
+  "id": "fromfile",
+  "type": "promptString",
+  "description": "From Source File"
+},
+{
+  "id": "ext",
+  "type": "promptString",
+  "description": "Extension"
+},
+  ]
+}
