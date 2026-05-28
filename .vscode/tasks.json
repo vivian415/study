@@ -14,7 +14,7 @@
     {
   "label": "IBM i MCP OPENLIB",
   "type": "shell",
-  "command": "OPENLIB ${input:lib}"
+  "command": "OPENLIB"
 },
     {
       "label": "IBM i MCP OPENMBR",
