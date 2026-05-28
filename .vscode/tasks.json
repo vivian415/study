@@ -22,15 +22,15 @@
       "command": "OPENMBR ${input:lib} ${input:file} ${input:mbr}"
     },
 
-    {
+{
   "label": "IBM i MCP CPYSRC",
   "type": "shell",
-  "command": "CPYSRC ${input:fromlib} ${input:tolib}"
+  "command": "CPYSRC ${input:fromlib} ${input:file} ${input:tolib}"
 },
 {
   "label": "IBM i MCP CPYMBR",
   "type": "shell",
-  "command": "CPYMBR ${input:fromlib} ${input:fromfile} ${input:member} ${input:tolib}"
+  "command": "CPYMBR ${input:fromlib} ${input:fromfile} ${input:mbr} ${input:tolib}"
 },
 {
   "label": "IBM i MCP CODEMBR",
@@ -44,10 +44,10 @@
       "command": "SAVEMBR ${input:lib} ${input:file} ${input:mbr}"
     },
     {
-      "label": "IBM i MCP CRTRPG",
-      "type": "shell",
-      "command": "CRTRPG KJNMLT ${input:lib} ${input:file} ${input:mbr}"
-    }
+  "label": "IBM i MCP CRTRPG",
+  "type": "shell",
+  "command": "CRTRPG ${input:targetlib} ${input:lib} ${input:file} ${input:mbr}"
+},
   ],
 
   "inputs": [
@@ -85,6 +85,11 @@
   "id": "ext",
   "type": "promptString",
   "description": "Extension"
+},
+{
+  "id": "targetlib",
+  "type": "promptString",
+  "description": "Target Library"
 },
   ]
 }
