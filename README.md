@@ -702,13 +702,13 @@ AI から MCP Server のツールを呼び出す役割を持つ。
 
 ### 今後実装予定の機能
 
-- IBM i コマンド実行
-- ソースメンバー参照
-- メンバーのIFS変換
-- VS Code + AI による編集
-- IBM i メンバーへの保存
+- CALLPGM
+- CRTSQLRPG
+- コンパイルエラー解析
 - Git連携
-- コンパイル支援
+- 影響範囲分析
+- AI支援リファクタリング
+- 自動テスト支援
 
 ### 実装予定コマンド
 
@@ -717,11 +717,17 @@ AI から MCP Server のツールを呼び出す役割を持つ。
 - OPENLIB
 - OPENOBJ
 - OPENMBR
+- CODEMBR
 - SAVEMBR
 
 ### Compile Operations
 
+Implemented
+
 - CRTRPG
+
+Planned
+
 - CRTSQLRPG
 
 ### Analysis Operations
@@ -732,20 +738,6 @@ AI から MCP Server のツールを呼び出す役割を持つ。
 - RTVMBRD
 - RUNSQL
 
-## Current Status
-
-現在以下を実装済み：
-
-- MCP Server 起動
-- OPENLIB
-- OPENOBJ
-- OPENMBR
-- SAVEMBR
-- CPYSRC
-- CPYMBR
-- CRTRPG
-- VS Code Task integration
-- AI coding workflow
 
 ### AI編集フロー
 
@@ -760,7 +752,11 @@ IBM i ソースメンバー
     ↓
 OPENMBR
     ↓
-IFS Stream File化
+メンバー選択
+    ↓
+CODEMBR
+    ↓
+Workspace Source
     ↓
 VS Code + Claude/Bob
     ↓
@@ -768,7 +764,7 @@ Git Commit
     ↓
 SAVEMBR
     ↓
-IBM i コンパイル
+CRTRPG
 ```
 
 ## AI利用時の原則
@@ -799,3 +795,200 @@ AI が生成したコードは必ず人間がレビューする。
 本プロジェクトは、
 IBM i の既存資産を維持しながら、
 AI支援開発とモダン開発フローを接続することを目的とする。
+
+最終的には、
+
+- IBM i ソース資産の可視化
+- Gitベースのソース管理
+- AIによるコード解析
+- AI支援による改修提案
+- 自動コンパイル／テスト支援
+
+を実現し、
+
+IBM i 開発者が VS Code と AI を活用して
+安全かつ効率的に保守開発を行える環境の構築を目指す。
+
+
+# Bob Workshop 環境での利用例
+
+## 概要
+
+IBM Bob Workshop を利用して、IBM i 向け MCP Server を起動し、ソースメンバーの取得・編集・保存・コンパイルを実施できることを確認した。
+
+動作確認済み機能
+
+* 動作確認済み機能
+
+* OPENLIB
+* OPENMBR
+* CODEMBR
+* SAVEMBR
+* CRTRPG
+
+## package.json の変更
+
+Bob Workshop の初期設定では Electron アプリが起動する。
+
+変更前
+
+```json
+"scripts": {
+  "start": "electron ."
+}
+```
+
+変更後
+
+```json
+"scripts": {
+  "start": "node .vscode/server.js"
+}
+```
+
+## 必要モジュール
+
+```bash
+npm install express ssh2 dotenv odbc
+```
+
+## .env の配置
+
+プロジェクトルートに配置する。
+
+例
+
+```text
+IBMI_HOST=xxxxx
+IBMI_USER=xxxxx
+IBMI_PASSWORD=xxxxx
+API_KEY=xxxxx
+```
+
+## MCP Server 起動
+
+```bash
+npm start
+```
+
+正常起動時
+
+```text
+server running on http://localhost:3000
+```
+
+接続確認
+
+```bash
+curl http://localhost:3000
+```
+
+結果
+
+```json
+{
+  "success": true,
+  "message": "MCP Server Running"
+}
+```
+
+## 動作確認結果
+
+### OPENLIB
+
+IBM i ライブラリー一覧取得成功
+
+### CODEMBR
+
+IBM i ソースメンバー取得成功
+
+例
+
+```text
+CODEMBR KJNMLD QRPGSRC@1 HELLO
+```
+
+取得したソースは
+
+```text
+workspace/
+└─ KJNMLD
+   └─ QRPGSRC@1
+      └─ HELLO.txt
+```
+
+として保存される。
+
+### SAVEMBR
+
+編集したソースを IBM i メンバーへ保存可能。
+
+例
+
+```text
+SAVEMBR KJNMLD QRPGSRC@1 HELLO
+```
+
+結果
+
+```text
+member saved
+```
+
+### CRTRPG
+
+RPG プログラムのコンパイル成功。
+
+例
+
+```text
+CRTRPG KJNMLT KJNMLD QRPGSRC@1 HELLO
+```
+
+結果
+
+```text
+HELLO compiled
+```
+
+## Bob Workshop 使用時の注意点
+
+CODEMBR 実行時は新しい Bob / VS Code ウィンドウが起動する場合がある。
+
+その場合は
+
+「フォルダーを開く」
+
+から
+
+```text
+Bob-workshop-main
+```
+
+を指定すると、Task が利用可能になる。
+
+現状はこの運用で問題なく
+
+```text
+CODEMBR
+↓
+編集
+↓
+SAVEMBR
+↓
+CRTRPG
+```
+
+を実施できることを確認済み。
+
+## 今後の予定
+
+* CALLPGM の実装確認
+* CRTSQLRPG の追加
+* OPENOBJ の強化
+* Git 連携
+* AI によるコード解析・修正支援
+* IBM i 開発エージェント化
+
+```
+```
