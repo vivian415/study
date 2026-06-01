@@ -396,20 +396,63 @@ KJNML   = 本番区画（本番ランタイム）
 KJNMLD  = 開発区画（開発ソース）
 KJNMLT  = 検証区画（テスト/コンパイル環境）
 ```
+## コンパイル環境
 
-**開発フロー:**
-1. 本番区画（KJNML）にある修正対象のソースとメンバーを開発区画（KJNMLD）にコピーする
-2. コピーしたメンバーをPC側で開く
-3. PC側でメンバーを修正
-4. 修正内容を開発区画（KJNMLD）に保存する
-5. 修正内容を検証区画（KJNMLT）にコンパイルして検証
-6. 問題なければ本番区画（KJNML）にデプロイする
+### COMPILE_LIBLについて
 
-**メモ:**
-1. IBM iの検証区画（KJNMLT）は検証に必要な環境をあらかじめ構築しておく
-2. PC側（workspace）にはIBM iと同じ階層構造をつくっておく
-3. 開発区画にあるソースファイルはGitにPushする
-4. 開発区画（KJNMLD）にはソースのみ、検証区画（KJNMLT）はオブジェクトのみを管理する
+コンパイル時に参照が必要なライブラリーは `.env` の `COMPILE_LIBL` で管理する。
+
+例
+
+```text
+COMPILE_LIBL=CSCH@003,KJNML
+```
+
+`compile-rpg` 実行時に MCP Server は COMPILE_LIBL を読み込み、指定されたライブラリーをライブラリーリストへ追加してからコンパイルを実行する。
+
+実装例
+
+```javascript
+const compileLibs =
+  process.env.COMPILE_LIBL.split(",");
+
+for (const lib of compileLibs) {
+
+  await connection.query(`
+CALL QSYS2.QCMDEXC('ADDLIBLE LIB(${lib})')
+`);
+
+}
+```
+
+これにより server.js にライブラリー名を固定記述する必要がなくなり、環境ごとの差異を .env のみで管理できる。
+
+2026/06/01 の検証では、
+
+```text
+COMPILE_LIBL=CSCH@003,KJNML
+```
+
+を設定することで、KJNMLD のソースを KJNMLT へ正常にコンパイルできることを確認した。
+
+
+## 開発フロー
+
+1. 本番区画（KJNML）にある修正対象のソースメンバーを開発区画（KJNMLD）へコピーする
+2. コピーしたメンバーを PC 側で開く
+3. PC 側（VS Code）でメンバーを修正する
+4. 修正内容を開発区画（KJNMLD）へ保存する
+5. 修正内容を検証区画（KJNMLT）へコンパイルして検証する
+6. 問題なければ本番区画（KJNML）へデプロイする
+
+---
+
+## 運用方針
+
+1. PC側（workspace）には IBM i と同じ階層構造を作成する
+2. 開発区画（KJNMLD）のソースは Git で管理する
+3. 開発区画（KJNMLD）は主にソース管理、検証区画（KJNMLT）は主にコンパイル済みオブジェクト管理に利用する
+4. コンパイル時のライブラリーリストは COMPILE_LIBL により管理する
 
 ---
 

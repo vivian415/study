@@ -17,10 +17,10 @@
   "command": "OPENLIB"
 },
     {
-      "label": "IBM i MCP OPENMBR",
-      "type": "shell",
-      "command": "OPENMBR ${input:lib} ${input:file} ${input:mbr}"
-    },
+  "label": "IBM i MCP OPENMBR",
+  "type": "shell",
+  "command": "OPENMBR ${input:lib} ${input:file}"
+},
 
 {
   "label": "IBM i MCP CPYSRC",

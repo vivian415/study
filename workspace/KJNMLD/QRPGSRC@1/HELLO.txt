@@ -1,4 +1,4 @@
 **FREE                                                                                              
-DSPLY 'HELLO WORLD';                                                                                
+DSPLY 'HELLO World2';                                                                                      
 *INLR = *ON;                                                                                        
 RETURN;                                                                                             

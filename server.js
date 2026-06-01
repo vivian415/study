@@ -420,6 +420,17 @@ app.post("/compile-rpg", async (req, res) => {
       `SRCFILE(${srclib}/${srcfile}) ` +
       `SRCMBR(${member})`;
 
+const compileLibs =
+  process.env.COMPILE_LIBL.split(",");
+
+for (const lib of compileLibs) {
+
+  await connection.query(`
+CALL QSYS2.QCMDEXC('ADDLIBLE LIB(${lib})')
+`);
+
+}
+
     const sql = `
 CALL QSYS2.QCMDEXC('${cmd}')
 `;
