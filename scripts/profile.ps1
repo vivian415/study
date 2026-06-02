@@ -353,49 +353,28 @@ function CALLPGM {
 function DEPLOYOBJ {
 
     param(
-        [string]$object,
-        [string]$type,
-        [string]$fromlib,
-        [string]$tolib
+        $object,
+        $type,
+        $fromLib,
+        $toLib
     )
+
+    $json = @{
+        object  = $object
+        type    = $type
+        fromLib = $fromLib
+        toLib   = $toLib
+    } | ConvertTo-Json
+
+    Write-Host "APIKEY=[$ApiKey]"
+    Write-Host "JSON=[$json]"
 
     Invoke-RestMethod `
       -Method POST `
-      -Uri "$BaseUrl/deploy-obj" `
+      -Uri "http://localhost:3000/deploy-obj" `
       -Headers @{
           "Content-Type" = "application/json"
           "x-api-key"    = $ApiKey
       } `
-      -Body (@{
-          object  = $object.ToUpper()
-          type    = $type.ToUpper()
-          fromLib = $fromlib.ToUpper()
-          toLib   = $tolib.ToUpper()
-      } | ConvertTo-Json)
-
-}
-
-function DEPLOYMBR {
-
-    param(
-        [string]$fromlib,
-        [string]$srcfile,
-        [string]$member,
-        [string]$tolib
-    )
-
-    Invoke-RestMethod `
-      -Method POST `
-      -Uri "$BaseUrl/deploy-member" `
-      -Headers @{
-          "Content-Type" = "application/json"
-          "x-api-key"    = $ApiKey
-      } `
-      -Body (@{
-          fromLib = $fromlib.ToUpper()
-          srcFile = $srcfile.ToUpper()
-          member  = $member.ToUpper()
-          toLib   = $tolib.ToUpper()
-      } | ConvertTo-Json)
-
+      -Body $json
 }
