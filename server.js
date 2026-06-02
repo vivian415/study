@@ -513,6 +513,9 @@ CALL QSYS2.QCMDEXC('${cmd}')
 //
 app.post("/deploy-obj", async (req, res) => {
 
+  console.log("DEPLOY ARRIVED");
+  console.log(req.body);
+
   const {
     object,
     type,
@@ -531,19 +534,37 @@ app.post("/deploy-obj", async (req, res) => {
        NAM=1;`
     );
 
-    const cmd =
-      `CRTDUPOBJ OBJ(${object}) ` +
-      `FROMLIB(${fromLib}) ` +
-      `OBJTYPE(${type}) ` +
-      `TOLIB(${toLib})`;
+    //
+// DELETE OLD OBJECT
+//
 
-    const sql = `
-CALL QSYS2.QCMDEXC('${cmd}')
-`;
+const deleteCmd =
+  `DLTOBJ OBJ(${toLib}/${object}) ` +
+  `OBJTYPE(${type})`;
 
-    console.log(cmd);
+console.log(deleteCmd);
 
-    await connection.query(sql);
+await connection.query(
+  `CALL QSYS2.QCMDEXC('${deleteCmd}')`
+);
+
+//
+// COPY NEW OBJECT
+//
+
+const copyCmd =
+  `CRTDUPOBJ OBJ(${object}) ` +
+  `FROMLIB(${fromLib}) ` +
+  `OBJTYPE(${type}) ` +
+  `TOLIB(${toLib})`;
+
+console.log(copyCmd);
+
+await connection.query(
+  `CALL QSYS2.QCMDEXC('${copyCmd}')`
+);
+
+
 
     await connection.close();
 
@@ -554,7 +575,15 @@ CALL QSYS2.QCMDEXC('${cmd}')
 
   } catch (err) {
 
+    console.log("DEPLOY ERROR");
+
     console.dir(err, { depth: null });
+
+    console.log(err.message);
+
+    if (err.odbcErrors) {
+      console.dir(err.odbcErrors, { depth: null });
+    }
 
     res.status(500).json({
       success: false,
@@ -568,6 +597,9 @@ CALL QSYS2.QCMDEXC('${cmd}')
 //
 // DEPLOY MEMBER
 //
+
+
+
 app.post("/deploy-member", async (req, res) => {
 
   const {

@@ -507,6 +507,45 @@ KJNMLT  = 検証/コンパイル環境
 7. 本番 source member deploy
 8. 本番 object deploy
 ```
+### 本番反映
+
+```text
+DEPLOYOBJ 
+　↓ 
+本番プログラム更新
+
+DEPLOYOBJ
+  ↓
+本番プログラム更新
+```
+
+### 検証済み
+
+HELLO を使用して以下を確認済み。
+
+```text
+OPENMBR
+　↓
+編集
+　↓
+SAVEMBR
+　↓
+CRTRPG
+　↓
+CALLPGM
+　↓
+DEPLOYOBJ
+　↓
+本番反映
+```
+
+これにより VS Code から IBM i 本番環境までの一連の開発フローを確認した。
+
+### 今後の予定
+
+DEPLOYMBR
+
+による本番ソース反映は実装済みだが、現時点では未検証。
 
 ### コマンド例
 

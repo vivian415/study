@@ -4,50 +4,57 @@
     {
       "label": "Start MCP Server",
       "type": "shell",
-      "command": "npm start"
+      "command": "npm start",
+      "problemMatcher": []
     },
     {
-  "label": "IBM i MCP OPENOBJ",
-  "type": "shell",
-  "command": "OPENOBJ ${input:lib}"
-},
+      "label": "IBM i MCP OPENOBJ",
+      "type": "shell",
+      "command": "OPENOBJ ${input:lib}"
+    },
     {
-  "label": "IBM i MCP OPENLIB",
-  "type": "shell",
-  "command": "OPENLIB"
-},
+      "label": "IBM i MCP OPENLIB",
+      "type": "shell",
+      "command": "OPENLIB"
+    },
     {
-  "label": "IBM i MCP OPENMBR",
-  "type": "shell",
-  "command": "OPENMBR ${input:lib} ${input:file}"
-},
-
-{
-  "label": "IBM i MCP CPYSRC",
-  "type": "shell",
-  "command": "CPYSRC ${input:fromlib} ${input:file} ${input:tolib}"
-},
-{
-  "label": "IBM i MCP CPYMBR",
-  "type": "shell",
-  "command": "CPYMBR ${input:fromlib} ${input:fromfile} ${input:mbr} ${input:tolib}"
-},
-{
-  "label": "IBM i MCP CODEMBR",
-  "type": "shell",
-  "command": "CODEMBR ${input:lib} ${input:file} ${input:mbr}"
-},
-
+      "label": "IBM i MCP OPENMBR",
+      "type": "shell",
+      "command": "OPENMBR ${input:lib} ${input:file}"
+    },
+    {
+      "label": "IBM i MCP CPYSRC",
+      "type": "shell",
+      "command": "CPYSRC ${input:fromlib} ${input:file} ${input:tolib}"
+    },
+    {
+      "label": "IBM i MCP CPYMBR",
+      "type": "shell",
+      "command": "CPYMBR ${input:fromlib} ${input:fromfile} ${input:mbr} ${input:tolib}"
+    },
+    {
+      "label": "IBM i MCP CODEMBR",
+      "type": "shell",
+      "command": "CODEMBR ${input:lib} ${input:file} ${input:mbr}"
+    },
     {
       "label": "IBM i MCP SAVEMBR",
       "type": "shell",
       "command": "SAVEMBR ${input:lib} ${input:file} ${input:mbr}"
     },
     {
-  "label": "IBM i MCP CRTRPG",
-  "type": "shell",
-  "command": "CRTRPG ${input:targetlib} ${input:lib} ${input:file} ${input:mbr}"
-},
+      "label": "IBM i MCP CRTRPG",
+      "type": "shell",
+      "command": "CRTRPG ${input:targetlib} ${input:lib} ${input:file} ${input:mbr}",
+      "problemMatcher": []
+    },
+    {
+      "label": "BM i MCP DEPLOYOBJ",
+      "type": "shell",
+      "command": "DEPLOYOBJ ${input:object} ${input:type} ${input:fromLib} ${input:toLib}",
+      "problemMatcher": []
+    }
+    
   ],
 
   "inputs": [
@@ -91,5 +98,31 @@
   "type": "promptString",
   "description": "Target Library"
 },
+
+{
+    "id": "object",
+    "type": "promptString",
+    "description": "Object"
+},
+{
+    "id": "type",
+    "type": "promptString",
+    "default": "*PGM",
+    "description": "Object Type"
+},
+{
+    "id": "fromLib",
+    "type": "promptString",
+    "default": "KJNMLT",
+    "description": "From Library"
+},
+{
+    "id": "toLib",
+    "type": "promptString",
+    "default": "KJNML",
+    "description": "To Library"
+},
+
+
   ]
 }
