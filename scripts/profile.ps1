@@ -366,9 +366,6 @@ function DEPLOYOBJ {
         toLib   = $toLib
     } | ConvertTo-Json
 
-    Write-Host "APIKEY=[$ApiKey]"
-    Write-Host "JSON=[$json]"
-
     Invoke-RestMethod `
       -Method POST `
       -Uri "http://localhost:3000/deploy-obj" `
@@ -377,4 +374,32 @@ function DEPLOYOBJ {
           "x-api-key"    = $ApiKey
       } `
       -Body $json
+}
+
+function DEPLOYMBR {
+
+    param(
+        $fromLib,
+        $srcFile,
+        $member,
+        $toLib
+    )
+
+    $json = @{
+        fromLib = $fromLib
+        srcFile = $srcFile
+        member  = $member
+        toLib   = $toLib
+    } | ConvertTo-Json
+
+    $response = Invoke-RestMethod `
+      -Method POST `
+      -Uri "http://localhost:3000/deploy-member" `
+      -Headers @{
+          "Content-Type" = "application/json"
+          "x-api-key"    = $ApiKey
+      } `
+      -Body $json
+
+    $response.message
 }

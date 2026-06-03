@@ -599,7 +599,6 @@ await connection.query(
 //
 
 
-
 app.post("/deploy-member", async (req, res) => {
 
   const {
@@ -621,10 +620,11 @@ app.post("/deploy-member", async (req, res) => {
     );
 
     const cmd =
-      `CPYSRCF FROMFILE(${fromLib}/${srcFile}) ` +
-      `TOFILE(${toLib}/${srcFile}) ` +
-      `FROMMBR(${member}) ` +
-      `TOMBR(${member})`;
+  `CPYSRCF FROMFILE(${fromLib}/${srcFile}) ` +
+  `TOFILE(${toLib}/${srcFile}) ` +
+  `FROMMBR(${member}) ` +
+  `TOMBR(${member}) ` +
+  `MBROPT(*REPLACE)`;
 
     const sql = `
 CALL QSYS2.QCMDEXC('${cmd}')

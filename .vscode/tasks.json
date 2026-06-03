@@ -49,12 +49,17 @@
       "problemMatcher": []
     },
     {
-      "label": "BM i MCP DEPLOYOBJ",
+      "label": "IBM i MCP DEPLOYOBJ",
       "type": "shell",
       "command": "DEPLOYOBJ ${input:object} ${input:type} ${input:fromLib} ${input:toLib}",
       "problemMatcher": []
-    }
-    
+    },
+    {
+  "label": "IBM i MCP DEPLOYMBR",
+  "type": "shell",
+  "command": "DEPLOYMBR ${input:deployFromLib} ${input:deploySrcFile} ${input:deployMember} ${input:deployToLib}",
+  "problemMatcher": []
+}
   ],
 
   "inputs": [
@@ -113,15 +118,34 @@
 {
     "id": "fromLib",
     "type": "promptString",
-    "default": "KJNMLT",
     "description": "From Library"
 },
 {
     "id": "toLib",
     "type": "promptString",
-    "default": "KJNML",
     "description": "To Library"
 },
+
+{
+  "id": "deployFromLib",
+  "type": "promptString",
+  "description": "Source Library"
+},
+{
+  "id": "deploySrcFile",
+  "type": "promptString",
+  "description": "Source File"
+},
+{
+  "id": "deployMember",
+  "type": "promptString",
+  "description": "Member"
+},
+{
+  "id": "deployToLib",
+  "type": "promptString",
+  "description": "Target Library"
+}
 
 
   ]
