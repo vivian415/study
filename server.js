@@ -140,7 +140,6 @@ app.post("/open-member", async (req, res) => {
     library,
     srcFile,
     member,
-    ext = "txt"
   } = req.body;
 
   try {
@@ -158,6 +157,41 @@ console.log("ALIAS SQL");
 console.log(aliasSql);
 
 await connection.query(aliasSql);
+
+// ← ここは元に戻す
+const ext = "txt";
+
+
+//
+// メンバータイプ取得
+//
+/*
+const typeSql = `
+SELECT SOURCE_TYPE
+FROM QSYS2.SYSPARTITIONSTAT
+WHERE TABLE_SCHEMA = '${library}'
+  AND TABLE_NAME = '${srcFile}'
+  AND PARTITION_NAME = '${member}'
+`;
+
+console.log("TYPE SQL");
+console.log(typeSql);
+
+const typeRows = await connection.query(typeSql);
+
+console.log(typeRows);
+
+const sourceType =
+  typeRows[0]?.SOURCE_TYPE || "TXT";
+
+const ext =
+  getExtension(sourceType);
+
+
+console.log(
+  `SRCTYPE=${sourceType} EXT=${ext}`
+);
+*/
 
 const sql = `
 SELECT SRCDTA

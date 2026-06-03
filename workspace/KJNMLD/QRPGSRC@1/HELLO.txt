@@ -1,4 +1,4 @@
 **FREE                                                                                              
-DSPLY 'HELLO EVERYONE';                                                                             
+DSPLY 'HELLO DEAR';                                                                                 
 *INLR = *ON;                                                                                        
 RETURN;                                                                                             
