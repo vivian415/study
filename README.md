@@ -61,16 +61,18 @@ MCP Server
 
 ## システム構成
 
+```text
 IBM i
-↓
+ ↓
 MCP Server
-↓
+ ↓
 Workspace
-↓
+ ↓
 VS Code
-├─ VS Code Task
-├─ Git
-└─ AI Assistant
+    ├─ VS Code Task
+    ├─ Git
+    └─ AI Assistant
+```
 
 ---
 
@@ -264,26 +266,15 @@ KJNML
 
 ### ソース操作
 
-OPENLIB
-  ライブラリー一覧表示
-
-OPENOBJ
-  オブジェクト一覧表示
-
-OPENMBR
-  メンバー一覧表示
-
-CODEMBR
-  メンバーを Workspace に展開し VS Code で開く
-
-SAVEMBR
-  Workspace の内容を IBM i へ保存
-
-CPYSRC
-  ソースファイルコピー
-
-CPYMBR
-  メンバーコピー
+| Command | Description |
+|----------|-------------|
+| OPENLIB | ライブラリー一覧表示 |
+| OPENOBJ | オブジェクト一覧表示 |
+| OPENMBR | メンバー一覧表示 |
+| CODEMBR | メンバーを Workspace に展開し VS Code で開く |
+| SAVEMBR | Workspace の内容を IBM i へ保存 |
+| CPYSRC | ソースファイルコピー |
+| CPYMBR | メンバーコピー |
 
 ### コンパイル
 
