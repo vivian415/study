@@ -206,6 +206,7 @@ git push
 
 ## 開発フロー
 
+```text
 本番ソース取得
  ↓
 CPYMBR
@@ -227,6 +228,7 @@ CALLPGM
 DEPLOYMBR
  ↓
 DEPLOYOBJ
+```
 
 ---
 
