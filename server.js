@@ -534,7 +534,7 @@ app.post("/deploy-obj", async (req, res) => {
        NAM=1;`
     );
 
-    //
+//
 // DELETE OLD OBJECT
 //
 
@@ -542,12 +542,22 @@ const deleteCmd =
   `DLTOBJ OBJ(${toLib}/${object}) ` +
   `OBJTYPE(${type})`;
 
+console.log("DELETE CMD");
 console.log(deleteCmd);
 
-await connection.query(
-  `CALL QSYS2.QCMDEXC('${deleteCmd}')`
-);
+try {
 
+  await connection.query(
+    `CALL QSYS2.QCMDEXC('${deleteCmd}')`
+  );
+
+  console.log("OLD OBJECT DELETED");
+
+} catch (e) {
+
+  console.log("OLD OBJECT NOT FOUND");
+
+}
 //
 // COPY NEW OBJECT
 //
@@ -558,12 +568,12 @@ const copyCmd =
   `OBJTYPE(${type}) ` +
   `TOLIB(${toLib})`;
 
+console.log("COPY CMD");
 console.log(copyCmd);
 
 await connection.query(
   `CALL QSYS2.QCMDEXC('${copyCmd}')`
 );
-
 
 
     await connection.close();

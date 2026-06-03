@@ -24,16 +24,14 @@ function OPENOBJ {
       -Headers @{"Content-Type"="application/json"; "x-api-key"=$ApiKey} `
       -Body (@{
           sql = @"
-SELECT 
-  TABLE_NAME,
-  CASE 
-    WHEN TABLE_TYPE = 'P' THEN 'PF'
-    WHEN TABLE_TYPE = 'L' THEN 'LF'
-    ELSE TABLE_TYPE
-  END AS TYPE
-FROM QSYS2.SYSTABLES
-WHERE TABLE_SCHEMA = '$lib'
-ORDER BY TABLE_NAME
+SELECT
+  OBJNAME,
+  OBJTYPE,
+  OBJTEXT
+FROM TABLE(
+  QSYS2.OBJECT_STATISTICS('$lib','*ALL')
+)
+ORDER BY OBJNAME
 "@
       } | ConvertTo-Json)
 
