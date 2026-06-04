@@ -262,23 +262,8 @@ MSHINAF.pf
 .pf        → CRTPF
 .dspf      → CRTDSPF
 
-AI Assistant はメンバー名ではなく拡張子を優先してソース種別を判定する。
-
-例
-
-HELLO.rpgle
-→ CRTRPG
-
-TESTEMP.sqlrpgle
-→ CRTSQLRPG
-
-MSHINAF.pf
-→ CRTPF
-
-
 
 AI Assistant は明示的な指示がない限り、以下を前提とする。
-
 * 編集対象は開発ライブラリー
 * コンパイル対象は検証ライブラリー
 * デプロイ先は本番ライブラリー
