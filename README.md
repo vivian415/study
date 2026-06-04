@@ -262,6 +262,8 @@ MSHINAF.pf
 .pf        → CRTPF
 .dspf      → CRTDSPF
 
+対象メンバーが開発ライブラリーに存在しない場合は、
+本番ライブラリーから開発ライブラリーへ CPYMBR を実行してから CODEMBR を実行する。
 
 AI Assistant は明示的な指示がない限り、以下を前提とする。
 * 編集対象は開発ライブラリー

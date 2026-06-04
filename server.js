@@ -248,19 +248,36 @@ console.log(rows);
 //
 app.post("/save-member", async (req, res) => {
 
-  const { library, file, member, ext = "txt" } = req.body;
+  const { library, file, member, ext } = req.body;
 
   try {
+
+    const connection = await odbc.connect(
+      `Driver={IBM i Access ODBC Driver};System=${process.env.IBMI_HOST};UID=${process.env.IBMI_USER};PWD=${process.env.IBMI_PASSWORD};CCSID=1208;`
+    );
+
+    const typeSql = `
+SELECT SOURCE_TYPE
+FROM QSYS2.SYSPARTITIONSTAT
+WHERE TABLE_SCHEMA = '${library}'
+  AND TABLE_NAME = '${file}'
+  AND TRIM(SYSTEM_TABLE_MEMBER) = '${member}'
+`;
+
+    const typeRows = await connection.query(typeSql);
+    const sourceType = typeRows[0]?.SOURCE_TYPE || "TXT";
+    const saveExt = ext || getExtension(sourceType);
 
     const filePath = path.join(
       __dirname,
       "workspace",
       library,
       file,
-      `${member}.${ext}`
+      `${member}.${saveExt}`
     );
 
     if (!fs.existsSync(filePath)) {
+      await connection.close();
 
       return res.status(404).json({
         success: false,
@@ -274,10 +291,6 @@ app.post("/save-member", async (req, res) => {
     const lines = text
       .replace(/\r\n/g, "\n")
       .split("\n");
-
-    const connection = await odbc.connect(
-      `Driver={IBM i Access ODBC Driver};System=${process.env.IBMI_HOST};UID=${process.env.IBMI_USER};PWD=${process.env.IBMI_PASSWORD};CCSID=1208;`
-    );
 
     await connection.query(
       `CREATE OR REPLACE ALIAS QTEMP.MBRSRC
@@ -304,7 +317,8 @@ app.post("/save-member", async (req, res) => {
     res.json({
       success: true,
       message: "member saved",
-      lines: lines.length
+      lines: lines.length,
+      ext: saveExt
     });
 
   } catch (err) {

@@ -1,0 +1,19 @@
+**FREE                                                                                              
+EXEC SQL                                                                                            
+   SET OPTION COMMIT = *NONE;                                                                       
+                                                                                                    
+EXEC SQL                                                                                            
+   UPDATE CSCH@003.MSSYAAF                                                                          
+      SET MSAASYNM = 'テスト更新'                                                                 
+    WHERE MSAASYCD = 303;                                                                           
+                                                                                                    
+IF SQLCOD = 0;                                                                                      
+   DSPLY '更新しました';                                                                          
+ELSEIF SQLCOD = 100;                                                                                
+   DSPLY '対象なし';                                                                              
+ELSE;                                                                                               
+   DSPLY ('SQLエラー ' + %CHAR(SQLCOD));                                                          
+ENDIF;                                                                                              
+                                                                                                    
+*INLR = *ON;                                                                                        
+RETURN;                                                                                             

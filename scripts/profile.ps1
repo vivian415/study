@@ -135,7 +135,6 @@ function SAVEMBR {
           library = $library.ToUpper()
           file    = $file.ToUpper()
           member  = $member.ToUpper()
-          ext     = "txt"
       } | ConvertTo-Json)
 
 }
