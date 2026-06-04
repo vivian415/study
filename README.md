@@ -301,9 +301,9 @@ DEPLOYOBJ
 
 ---
 
-## コマンド例
+### コマンド例
 
-```powershell
+```text
 cpysrc kjnml qrpgsrc@1 kjnmld
 
 cpymbr kjnml qrpgsrc@1 hello kjnmld
@@ -320,6 +320,25 @@ deploymbr kjnmld qrpgsrc@1 hello kjnml
 
 deployobj hello *pgm kjnmlt kjnml
 ```
+
+SQLRPGLE
+
+```text
+codembr kjnmld qrpgsrc@1 testemp
+
+savembr kjnmld qrpgsrc@1 testemp
+
+crtsqlrpg kjnmlt kjnmld qrpgsrc@1 testemp
+
+callpgm kjnmlt testemp
+```
+
+DDS (PF)
+
+```text
+crtpf kjnmlt kjnml qddssrc mshinaf
+```
+
 
 ---
 
