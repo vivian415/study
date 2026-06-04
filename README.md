@@ -203,32 +203,48 @@ git push
 * 検証完了後に本番反映する
 
 ---
+### 開発フロー
 
-## 開発フロー
+本プロジェクトでは以下の開発フローを前提とする。
 
 ```text
-本番ソース取得
- ↓
 CPYMBR
  ↓
-OPENMBR
- （メンバー確認）
- ↓
 CODEMBR
- （VS Codeで編集）
  ↓
 SAVEMBR
  ↓
-Git Commit / Push
- ↓
-CRTRPG
+Compile
  ↓
 CALLPGM
  ↓
-DEPLOYMBR
- ↓
-DEPLOYOBJ
+Deploy
 ```
+
+ソース種別に応じて使用するコンパイルコマンドは異なる。
+
+| ソース種別    | 拡張子       | コンパイルコマンド |
+| -------- | --------- | --------- |
+| RPGLE    | .rpgle    | CRTRPG    |
+| SQLRPGLE | .sqlrpgle | CRTSQLRPG |
+| PF DDS   | .pf       | CRTPF     |
+| DSPF DDS | .dspf     | CRTDSPF   |
+
+CODEMBR実行時にソースタイプを取得し、適切な拡張子でVS Codeへ展開する。
+
+例
+
+```text
+HELLO.rpgle
+  → CRTRPG
+
+TESTEMP.sqlrpgle
+  → CRTSQLRPG
+
+MSHINAF.pf
+  → CRTPF
+```
+
 
 ---
 
