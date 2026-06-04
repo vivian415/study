@@ -94,7 +94,6 @@ function CODEMBR {
           library = $library
           srcFile = $srcFile
           member  = $member
-          ext     = "txt"
       } | ConvertTo-Json)
 
     $response
@@ -169,6 +168,7 @@ function CRTRPG {
 }
 
 function CRTPF {
+
     param(
         [string]$targetlib,
         [string]$srclib,
@@ -176,17 +176,23 @@ function CRTPF {
         [string]$member
     )
 
-    Invoke-RestMethod `
+    $response = Invoke-RestMethod `
       -Method POST `
-      -Uri "$BaseUrl/run" `
+      -Uri "$BaseUrl/compile-pf" `
       -Headers @{
-        "Content-Type"="application/json"
-        "x-api-key"=$ApiKey
+          "Content-Type" = "application/json"
+          "x-api-key"    = $ApiKey
       } `
       -Body (@{
-        command = "CRTPF FILE($targetlib/$member) SRCFILE($srclib/$srcfile) SRCMBR($member)"
+          targetlib = $targetlib.ToUpper()
+          srclib    = $srclib.ToUpper()
+          srcfile   = $srcfile.ToUpper()
+          member    = $member.ToUpper()
       } | ConvertTo-Json)
+
+    $response
 }
+
 function CRTDSPF {
     param(
         [string]$targetlib,
@@ -208,6 +214,7 @@ function CRTDSPF {
 }
 
 function CRTSQLRPG {
+
     param(
         [string]$targetlib,
         [string]$srclib,
@@ -215,46 +222,21 @@ function CRTSQLRPG {
         [string]$member
     )
 
-    Invoke-RestMethod `
+    $response = Invoke-RestMethod `
       -Method POST `
-      -Uri "$BaseUrl/sql" `
+      -Uri "$BaseUrl/compile-sqlrpg" `
       -Headers @{
-        "Content-Type"="application/json"
-        "x-api-key"=$ApiKey
+          "Content-Type" = "application/json"
+          "x-api-key"    = $ApiKey
       } `
       -Body (@{
-        sql = @"
-CALL QSYS2.QCMDEXC(
-'CRTSQLRPGI OBJ($targetlib/$member)
- SRCFILE($srclib/$srcfile)
- SRCMBR($member)'
-)
-"@
+          targetlib = $targetlib.ToUpper()
+          srclib    = $srclib.ToUpper()
+          srcfile   = $srcfile.ToUpper()
+          member    = $member.ToUpper()
       } | ConvertTo-Json)
-}
 
-function DELMBR {
-    param($lib, $srcfile, $member)
-
-    Invoke-RestMethod `
-      -Method POST `
-      -Uri "$BaseUrl/sql" `
-      -Headers @{"Content-Type"="application/json"; "x-api-key"=$ApiKey} `
-      -Body (@{
-        sql = "CALL QSYS2.QCMDEXC('RMVM FILE($lib/$srcfile) MBR($member)')"
-      } | ConvertTo-Json)
-}
-
-function ADDMBR {
-    param($lib, $srcfile, $member)
-
-    Invoke-RestMethod `
-      -Method POST `
-      -Uri "$BaseUrl/sql" `
-      -Headers @{"Content-Type"="application/json"; "x-api-key"=$ApiKey} `
-      -Body (@{
-        sql = "CALL QSYS2.QCMDEXC('ADDPFM FILE($lib/$srcfile) MBR($member)')"
-      } | ConvertTo-Json)
+    $response
 }
 
 function CMPLRPG {

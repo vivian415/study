@@ -158,40 +158,35 @@ console.log(aliasSql);
 
 await connection.query(aliasSql);
 
-// ← ここは元に戻す
-const ext = "txt";
 
 
 //
-// メンバータイプ取得
+// codembr
 //
-/*
+
 const typeSql = `
 SELECT SOURCE_TYPE
 FROM QSYS2.SYSPARTITIONSTAT
 WHERE TABLE_SCHEMA = '${library}'
   AND TABLE_NAME = '${srcFile}'
-  AND PARTITION_NAME = '${member}'
+  AND TRIM(SYSTEM_TABLE_MEMBER) = '${member}'
 `;
-
-console.log("TYPE SQL");
-console.log(typeSql);
 
 const typeRows = await connection.query(typeSql);
 
-console.log(typeRows);
+console.dir(typeRows, { depth: null });
+
 
 const sourceType =
   typeRows[0]?.SOURCE_TYPE || "TXT";
 
-const ext =
+  const ext =
   getExtension(sourceType);
 
-
-console.log(
+ console.log(
   `SRCTYPE=${sourceType} EXT=${ext}`
-);
-*/
+); 
+
 
 const sql = `
 SELECT SRCDTA
@@ -493,6 +488,114 @@ CALL QSYS2.QCMDEXC('${cmd}')
   }
 
 });
+
+//
+// COMPILE SQL RPG
+//
+app.post("/compile-sqlrpg", async (req, res) => {
+
+  const {
+    targetlib,
+    srclib,
+    srcfile,
+    member
+  } = req.body;
+
+  try {
+
+    const connection = await odbc.connect(
+      `Driver={IBM i Access ODBC Driver};System=${process.env.IBMI_HOST};UID=${process.env.IBMI_USER};PWD=${process.env.IBMI_PASSWORD};CCSID=1208;NAM=1;`
+    );
+
+    const cmd =
+      `CRTSQLRPGI ` +
+      `OBJ(${targetlib}/${member}) ` +
+      `SRCFILE(${srclib}/${srcfile}) ` +
+      `SRCMBR(${member})`;
+
+    const sql = `
+CALL QSYS2.QCMDEXC('${cmd}')
+`;
+
+    console.log("COMPILE SQL RPG");
+    console.log(sql);
+
+    await connection.query(sql);
+
+    await connection.close();
+
+    res.json({
+      success: true,
+      message: `${member} compiled`
+    });
+
+  } catch (err) {
+
+    console.dir(err, { depth: null });
+
+    res.status(500).json({
+      success: false,
+      error: err.message
+    });
+
+  }
+
+});
+
+//
+// COMPILE PF
+//
+app.post("/compile-pf", async (req, res) => {
+
+  const {
+    targetlib,
+    srclib,
+    srcfile,
+    member
+  } = req.body;
+
+  try {
+
+    const connection = await odbc.connect(
+      `Driver={IBM i Access ODBC Driver};System=${process.env.IBMI_HOST};UID=${process.env.IBMI_USER};PWD=${process.env.IBMI_PASSWORD};CCSID=1208;NAM=1;`
+    );
+
+    const cmd =
+      `CRTPF ` +
+      `FILE(${targetlib}/${member}) ` +
+      `SRCFILE(${srclib}/${srcfile}) ` +
+      `SRCMBR(${member})`;
+
+    const sql = `
+CALL QSYS2.QCMDEXC('${cmd}')
+`;
+
+    console.log("COMPILE PF SQL");
+    console.log(sql);
+
+    await connection.query(sql);
+
+    await connection.close();
+
+    res.json({
+      success: true,
+      message: `${member} created`
+    });
+
+  } catch (err) {
+
+    console.dir(err, { depth: null });
+
+    res.status(500).json({
+      success: false,
+      error: err.message
+    });
+
+  }
+
+});
+
+
 
 //
 // CALL PROGRAM

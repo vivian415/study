@@ -48,6 +48,20 @@
       "command": "CRTRPG ${input:targetlib} ${input:lib} ${input:file} ${input:mbr}",
       "problemMatcher": []
     },
+
+   {
+  "label": "IBM i MCP CRTSQLRPG",
+  "type": "shell",
+  "command": "CRTSQLRPG ${input:targetlib} ${input:lib} ${input:file} ${input:mbr}",
+  "problemMatcher": []
+},{
+  "label": "IBM i MCP CRTPF",
+  "type": "shell",
+  "command": "CRTPF ${input:targetlib} ${input:lib} ${input:file} ${input:mbr}",
+  "problemMatcher": []
+},
+
+
     {
       "label": "IBM i MCP DEPLOYOBJ",
       "type": "shell",
