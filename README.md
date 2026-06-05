@@ -78,11 +78,22 @@ VS Code
 
 ## ライブラリー構成
 
-KJNML   = 本番環境
+```text
+KJNML   = 本番ライブラリー
 
-KJNMLD  = 開発環境
+KJNMLD  = 開発ライブラリー
 
-KJNMLT  = 検証環境
+KJNMLT  = テストライブラリー
+```
+
+### 基本ルール
+
+* 本番ライブラリー（KJNML）は直接編集しない
+* 開発はKJNMLDで行う
+* コンパイル・検証はKJNMLTで行う
+* Gitで履歴管理を行う
+* 検証完了後に本番へ反映する
+
 
 ---
 
@@ -203,21 +214,210 @@ git push
 * 検証完了後に本番反映する
 
 ---
+
+## 起動手順
+
+1. Open Folder → C:\Users\K4293\mcp-server
+2. Run Task → Start MCP Server
+3. ブラウザで http://localhost:3000 を確認
+
+正常時
+
+{"success":true,"message":"MCP Server Running"}
+
+### 注意
+
+MCPサーバーは必ず mcp-server フォルダから起動すること。
+
+異なる server.js を起動した場合、
+CODEMBR が HELLO.txt のような誤った拡張子で展開される可能性がある。
+```
+
+### 注意事項
+
+MCPサーバーを別のワークスペースや別の server.js で起動すると、CODEMBR実行時にソースタイプが正しく取得できない場合がある。
+
+その場合、
+
+```text
+HELLO.txt
+```
+
+として開いてしまう。
+
+正しく起動した場合は、
+
+```text
+HELLO.rpgle
+```
+
+のように IBM i のソースタイプに応じた拡張子で開かれる。
+
+今回の事象は server.js の不具合ではなく、異なる server.js を起動していたことが原因であった。
+
+
+
 ## 開発フロー
 
-### 標準運用
+### IBMi標準運用手順
 
-ソース修正要求を受けた場合は以下を標準手順とする。
+IBM i のソース修正依頼を受けた場合は必ず以下の手順に従う。
 
-1. 本番ライブラリーから開発ライブラリーへメンバーをコピーする
-2. 開発ライブラリーのメンバーを CODEMBR で開く
-3. 修正後 SAVEMBR を実行する
-4. ソース種別に応じてコンパイルする
-5. 必要に応じて CALLPGM で動作確認する
-6. 検証完了後に DEPLOY を実行する
+# IBM i 標準運用手順
+
+IBM i のソース修正依頼を受けた場合は必ず以下の手順に従う。
+
+## Step 0 MCPサーバー確認
+
+まず MCPサーバーが起動していることを確認する。
+
+確認URL
+
+http://localhost:3000
+
+正常時
+
+{"success":true,"message":"MCP Server Running"}
+
+起動していない場合
+
+1. C:\Users\K4293\mcp-server を開く
+2. Start MCP Server を実行する
+3. localhost:3000 を再確認する
+
+MCPサーバー起動前に IBM i コマンドを実行してはならない。
+
+### Bob利用時の注意1
+
+MCP Server確認時は curl ではなく以下を使用する。
+
+Invoke-RestMethod -Uri "http://localhost:3000"
+
+期待結果
+
+{"success":true,"message":"MCP Server Running"}
+
+## Bobへの重要事項2
+
+本MCPサーバーは .env を使用する。
+
+server.js 起動時には
+
+require("dotenv").config();
+
+が必須。
+
+ODBC接続エラーが発生した場合は
+最初に .env の読み込みを確認すること。
+
+接続情報は process.env から取得する。
+
+
+---
+
+## Step 1 開発ライブラリー確認
+
+対象メンバーが KJNMLD に存在するか確認する。
+
+---
+
+## Step 2 メンバーコピー
+
+KJNMLD に存在しない場合は
+
+CPYMBR
+
+を実行して本番ライブラリーから開発ライブラリーへコピーする。
+
+---
+
+## Step 3 ソースを開く
+
+CODEMBR
+
+を実行して VS Code でソースを開く。
+
+---
+
+## Step 4 編集
+
+ソースを修正する。
+
+---
+
+## Step 5 保存
+
+SAVEMBR
+
+を実行して IBM i へ保存する。
+
+---
+
+## Step 6 コンパイル
+
+ソース種別に応じてコンパイルする。
+
+.rpgle → CRTRPG
+
+.sqlrpgle → CRTSQLRPG
+
+.pf → CRTPF
+
+.dspf → CRTDSPF
+
+---
+
+## Step 7 動作確認
+
+必要に応じて CALLPGM を実行する。
+
+---
+
+## Step 8 デプロイ
+
+検証完了後に
+
+DEPLOYMBR
+
+または
+
+DEPLOYOBJ
+
+を実行する。
+
+---
+
+## 重要
+
+既に用意されている IBM i コマンドを優先して使用する。
+
+OPENLIB
+
+OPENOBJ
+
+OPENMBR
+
+CODEMBR
+
+SAVEMBR
+
+CPYMBR
+
+CRTRPG
+
+CRTSQLRPG
+
+CALLPGM
+
+DEPLOYMBR
+
+DEPLOYOBJ
+
+これらで実現可能な場合は、新しい PowerShell スクリプトや補助ツールを作成してはならない。
+
+
 
 明示的な指示がない限り、本手順を標準手順として使用する。
-
 AI Assistant は本手順に従って操作を提案するものとする。
 
 
@@ -272,6 +472,26 @@ AI Assistant は明示的な指示がない限り、以下を前提とする。
 
 ライブラリー名よりも役割（本番・開発・検証）を優先して判断する。
 
+## AI Assistant Additional Rules
+
+既存のIBM iコマンドで実現可能な場合は、
+新しいPowerShellスクリプトや補助ツールを作成してはならない。
+
+まず以下のコマンドの利用を検討すること。
+
+OPENLIB
+OPENOBJ
+OPENMBR
+CODEMBR
+SAVEMBR
+CPYMBR
+CRTRPG
+CRTSQLRPG
+CRTPF
+CRTDSPF
+CALLPGM
+DEPLOYMBR
+DEPLOYOBJ
 
 ---
 

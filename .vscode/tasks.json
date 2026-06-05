@@ -2,11 +2,14 @@
   "version": "2.0.0",
   "tasks": [
     {
-      "label": "Start MCP Server",
-      "type": "shell",
-      "command": "npm start",
-      "problemMatcher": []
-    },
+  "label": "Start MCP Server",
+  "type": "shell",
+  "command": "npm start",
+  "options": {
+    "cwd": "C:\\Users\\K4293\\mcp-server"
+  },
+  "problemMatcher": []
+},
     {
       "label": "IBM i MCP OPENOBJ",
       "type": "shell",
