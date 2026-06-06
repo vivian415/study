@@ -263,7 +263,7 @@ HELLO.rpgle
 
 IBM i のソース修正依頼を受けた場合は必ず以下の手順に従う。
 
-## Step 0 MCPサーバー確認
+### Step 0 MCPサーバー確認
 
 まず MCPサーバーが起動していることを確認する。
 
@@ -293,7 +293,7 @@ Invoke-RestMethod -Uri "http://localhost:3000"
 
 {"success":true,"message":"MCP Server Running"}
 
-## Bobへの重要事項2
+### Bobへの重要事項2
 
 本MCPサーバーは .env を使用する。
 
