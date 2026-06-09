@@ -521,11 +521,24 @@ app.post("/compile-sqlrpg", async (req, res) => {
       `Driver={IBM i Access ODBC Driver};System=${process.env.IBMI_HOST};UID=${process.env.IBMI_USER};PWD=${process.env.IBMI_PASSWORD};CCSID=1208;NAM=1;`
     );
 
+    const compileLibs =
+      process.env.COMPILE_LIBL.split(",");
+
+    for (const lib of compileLibs) {
+
+      await connection.query(`
+CALL QSYS2.QCMDEXC('ADDLIBLE LIB(${lib})')
+`);
+
+    }
+
     const cmd =
       `CRTSQLRPGI ` +
       `OBJ(${targetlib}/${member}) ` +
       `SRCFILE(${srclib}/${srcfile}) ` +
-      `SRCMBR(${member})`;
+      `SRCMBR(${member}) ` +
+      `COMMIT(*NONE) ` +
+      `DBGVIEW(*SOURCE)`;
 
     const sql = `
 CALL QSYS2.QCMDEXC('${cmd}')
