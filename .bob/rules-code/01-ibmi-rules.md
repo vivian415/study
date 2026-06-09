@@ -20,6 +20,23 @@ QPRTSRC@1
 
 存在確認は推測ではなく OPENMBR または OPENOBJ を使用すること。
 
+# AI Agent Rules
+
+必ず以下の順番で実行すること
+
+1. Start MCP Server
+2. MCP Server Running確認
+3. OPENLIB
+4. OPENOBJ
+5. OPENMBR
+6. CODEMBR
+
+Step1へ進む前に
+Step0成功を必ず確認すること
+
+MCP Server未起動状態で
+OPENLIB、OPENOBJ、OPENMBR、CODEMBRを実行してはならない
+
 ## Mandatory Rules
 
 1. Never modify KJNML directly.

@@ -113,9 +113,24 @@ app.post("/sql", async (req, res) => {
 
     await connection.close();
 
+    // Convert BigInt values to strings for JSON serialization
+    const convertBigInt = (obj) => {
+      if (obj === null || obj === undefined) return obj;
+      if (typeof obj === 'bigint') return obj.toString();
+      if (Array.isArray(obj)) return obj.map(convertBigInt);
+      if (typeof obj === 'object') {
+        const converted = {};
+        for (const key in obj) {
+          converted[key] = convertBigInt(obj[key]);
+        }
+        return converted;
+      }
+      return obj;
+    };
+
     res.json({
      success: true,
-      rows: result
+      rows: convertBigInt(result)
     });
 
   } catch (err) {

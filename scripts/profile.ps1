@@ -39,10 +39,8 @@ ORDER BY OBJNAME
 }
 
 function OPENMBR {
-    param([string]$lib, [string]$obj)
 
-    $lib = $lib.ToUpper()
-    $obj = $obj.ToUpper()
+    param([string]$lib, [string]$obj)
 
     $response = Invoke-RestMethod `
       -Method POST `
@@ -50,25 +48,14 @@ function OPENMBR {
       -Headers @{"Content-Type"="application/json"; "x-api-key"=$ApiKey} `
       -Body (@{
           sql = @"
-SELECT 
-  TRIM(A.SYSTEM_TABLE_MEMBER) AS MEMBER,
-  VARCHAR(A.NUMBER_ROWS) AS ROWS,
-  CASE 
-    WHEN B.TABLE_TYPE = 'P' THEN 'PF'
-    WHEN B.TABLE_TYPE = 'L' THEN 'LF'
-    ELSE B.TABLE_TYPE
-  END AS TYPE
-FROM QSYS2.SYSPARTITIONSTAT A
-JOIN QSYS2.SYSTABLES B
-  ON A.TABLE_SCHEMA = B.TABLE_SCHEMA
- AND A.TABLE_NAME = B.TABLE_NAME
-WHERE A.TABLE_SCHEMA = '$lib'
-  AND A.TABLE_NAME = '$obj'
-ORDER BY A.SYSTEM_TABLE_MEMBER
+SELECT *
+FROM QSYS2.SYSPARTITIONSTAT
+WHERE TABLE_SCHEMA = '$($lib.ToUpper())'
+FETCH FIRST 20 ROWS ONLY
 "@
       } | ConvertTo-Json)
 
-    $response.rows | Format-Table
+    $response.rows
 }
 
 function CODEMBR {
