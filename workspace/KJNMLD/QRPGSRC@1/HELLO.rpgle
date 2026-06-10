@@ -1,5 +1,5 @@
 **FREE                                                                                              
-DSPLY 'HELLO Everyone';
+DSPLY 'HELLO World';                                                                                
 DSPLY 'I am here';                                                                                  
 *INLR = *ON;                                                                                        
 RETURN;                                                                                             
