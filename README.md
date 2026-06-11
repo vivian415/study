@@ -388,27 +388,31 @@ DEPLOYOBJ
 
 既に用意されている IBM i コマンドを優先して使用する。
 
-OPENLIB
+OPENLIB  ライブラリー一覧を開く
 
-OPENOBJ
+OPENOBJ　指定したライブラリーにあるオブジェクト一覧を開く
 
-OPENMBR
+OPENMBR　指定したオブジェクトにあるメンバー一覧を開く
 
-CODEMBR
+CODEMBR　指定したメンバーをVS Codeで開く
 
-SAVEMBR
+SAVEMBR　　指定したメンバーをIBMiに保存する
 
-CPYMBR
+CPYOBJ  オブジェクトを指定したライブラリーの下にコピーする（初回のみ使用）
 
-CRTRPG
+CPYMBR　メンバーを指定したオブジェクトの下にコピーする
 
-CRTSQLRPG
+CRTRPG　RPGLEソースをコンパイルする
 
-CALLPGM
+CRTSQLRPG　SQLRPGLEソースをコンパイルする
 
-DEPLOYMBR
+CRTPF　PFを作成する
 
-DEPLOYOBJ
+CALLPGM　プログラムを実行する
+
+DEPLOYMBR　メンバーを指定したオブジェクトの下にデプロイする
+
+DEPLOYOBJ　オブジェクトを指定したライブラリーにデプロイする
 
 これらで実現可能な場合は、新しい PowerShell スクリプトや補助ツールを作成してはならない。
 
