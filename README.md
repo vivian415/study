@@ -650,7 +650,7 @@ DEPLOYOBJ
 
 ---
 
-## 今後の予定
+## 今後必要となる可能性のある機能（将来拡張候補） 
 
 * DSPPGMREF
 * DSPOBJD
