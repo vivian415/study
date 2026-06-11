@@ -150,6 +150,7 @@ IBM i MCP コマンドは共通 Profile として管理する。
 * CPYSRC
 * CPYMBR
 * CRTRPG
+* CRTPF
 * CALLPGM
 * DEPLOYMBR
 * DEPLOYOBJ
@@ -398,15 +399,15 @@ CODEMBR　指定したメンバーをVS Codeで開く
 
 SAVEMBR　　指定したメンバーをIBMiに保存する
 
-CPYOBJ  オブジェクトを指定したライブラリーの下にコピーする（初回のみ使用）
+CPYSRC   ソースオブジェクトを指定したライブラリーの下にコピーする（初回のみ使用）
 
-CPYMBR　メンバーを指定したオブジェクトの下にコピーする
+CPYMBR　 メンバーを指定したオブジェクトの下にコピーする
 
-CRTRPG　RPGLEソースをコンパイルする
+CRTRPG　 RPGLEソースをコンパイルする
 
 CRTSQLRPG　SQLRPGLEソースをコンパイルする
 
-CRTPF　PFを作成する
+CRTPF　 PFソースをコンパイルする
 
 CALLPGM　プログラムを実行する
 
@@ -486,6 +487,7 @@ OPENMBR
 CODEMBR
 SAVEMBR
 CPYMBR
+CPYSRC
 CRTRPG
 CRTSQLRPG
 CRTPF
